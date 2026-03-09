@@ -189,59 +189,40 @@ The real bugs were:
 
 ---
 
-### Phase 3 — JS Loader connecting to Python RPC (~3 days)
+### Phase 3 — Reality Check: What CE Already Provides ✅
 
-Replace the one-shot `ds.load()` call at insert time with a persistent loader
-that can re-fetch on demand.
+Investigation of the CE `spreadsheet` addon revealed that Phases 3 and 4 (as
+originally planned) are **largely already implemented** in Odoo 18 CE:
 
-1. **Controller endpoint**
+**Already available in CE `spreadsheet` + o-spreadsheet:**
 
-   ```python
-   # controllers/main.py
-   @route("/spreadsheet/pivot/data", type="json", auth="user")
-   def get_pivot_data(self, model, domain, context, rows, columns, measures):
-       return request.env["spreadsheet.spreadsheet"]._get_pivot_data(
-           model, domain, context, rows, columns, measures
-       )
-   ```
+| Feature | Status |
+|---------|--------|
+| `OdooPivot` class with live `load({ reload: true })` | ✅ CE `spreadsheet/static/src/pivot/odoo_pivot.js` |
+| `PIVOT.VALUE()` formula function | ✅ registered in `o_spreadsheet.js` |
+| `PIVOT.HEADER()` formula function | ✅ registered in `o_spreadsheet.js` |
+| `PIVOT()` spill formula (renders full table) | ✅ registered in `o_spreadsheet.js` |
+| `pivotMode: "dynamic"` → writes `=PIVOT(id)` | ✅ `insertPivotWithTable` in o_spreadsheet |
+| Data-source-updated → EVALUATE_CELLS auto-refresh | ✅ `SpreadsheetRenderer` listener |
 
-2. **`OcaPivotDataSource` JS class**
+**The OCA `importDataPivot` already uses `pivotMode: "dynamic"`**, which means
+inserted pivots contain a single `=PIVOT(formulaId)` cell. When the data source
+reloads (REFRESH_PIVOT), the formula auto-recalculates — the pivot IS live.
 
-   ```js
-   // static/src/spreadsheet/pivot_data_source.esm.js
-   export class OcaPivotDataSource {
-       constructor(orm, definition) { ... }
-       async load({ reload = false } = {}) {
-           if (!reload && this._data) return;
-           this._data = await this.orm.call("spreadsheet.spreadsheet", "get_pivot_data", ...);
-       }
-       getValue(measure, rowPath, colPath) { ... }
-       getHeaderLabel(dimension, value) { ... }
-       getTableStructure() { ... }  // returns same shape as current static export
-   }
-   ```
+**Remaining gap:** The `can_be_dynamic: false` hardcode in `pivot_controller.esm.js`
+prevents the wizard from being opened in dynamic mode. When `can_be_dynamic` is
+`false`, the wizard skips the mode toggle and directly inserts with `pivotMode: "dynamic"`.
+Actually, looking at the code, OCA already defaults to `pivotMode: "dynamic"` regardless.
 
-3. **Wire into `importDataPivot`**
+**Real Phase 3 work:** The Python `get_pivot_data()` endpoint (Phase 1) is still
+useful as a server-side alternative to the client-side `read_group` cascade — useful
+for:
+1. Pre-computing pivot data at export time (XLSX download with fresh data)
+2. Scheduled reports (server-side pivot computation without a browser)
+3. A future REST API for pivot data consumption by external tools
 
-   Replace the current one-shot flow:
-   ```js
-   // Before:
-   const ds = spreadsheet_model.getters.getPivot(pivotId);
-   await ds.load();                    // one-shot
-   const table = ds.getTableStructure();
-   // ...INSERT_PIVOT_WITH_TABLE with static table
-
-   // After:
-   const ds = new OcaPivotDataSource(this.orm, pivot_info);
-   await ds.load();
-   const table = ds.getTableStructure();
-   // register ds so REFRESH_PIVOT can reload it
-   pivotDataSourceRegistry.set(pivotId, ds);
-   // INSERT_PIVOT_WITH_TABLE with same static table (Phase 3 still table-based)
-   ```
-
-   At this stage the inserted table still looks the same — but "Refresh all
-   data" now actually refetches and re-renders.
+**For now, Phase 3 is "done" by CE.** The focus should shift to innovative
+features beyond what Enterprise has. See section 9 (Future Directions).
 
 ---
 
