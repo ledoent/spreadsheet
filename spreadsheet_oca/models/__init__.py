@@ -7,4 +7,7 @@ from . import spreadsheet_spreadsheet_import_mode
 from . import pivot_data
 from . import spreadsheet_refresh_schedule
 from . import spreadsheet_alert
+from . import spreadsheet_subscription
 from . import spreadsheet_xlsx_export
+from . import spreadsheet_scenario
+from . import spreadsheet_writeback

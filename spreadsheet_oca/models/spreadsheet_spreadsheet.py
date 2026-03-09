@@ -83,6 +83,20 @@ class SpreadsheetSpreadsheet(models.Model):
         for rec in self:
             rec.alert_count = count_map.get(rec.id, 0)
 
+    subscriber_count = fields.Integer(
+        compute="_compute_subscriber_count", string="Subscribers"
+    )
+
+    def _compute_subscriber_count(self):
+        counts = self.env["spreadsheet.subscription"].read_group(
+            [("spreadsheet_id", "in", self.ids), ("active", "=", True)],
+            ["spreadsheet_id"],
+            ["spreadsheet_id"],
+        )
+        count_map = {c["spreadsheet_id"][0]: c["spreadsheet_id_count"] for c in counts}
+        for rec in self:
+            rec.subscriber_count = count_map.get(rec.id, 0)
+
     def action_open_alerts(self):
         self.ensure_one()
         return {
@@ -100,6 +114,42 @@ class SpreadsheetSpreadsheet(models.Model):
             "type": "ir.actions.act_window",
             "name": _("Refresh Schedules"),
             "res_model": "spreadsheet.refresh.schedule",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
+    def action_open_subscriptions(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Subscribers"),
+            "res_model": "spreadsheet.subscription",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
+    scenario_count = fields.Integer(
+        compute="_compute_scenario_count", string="What-If Scenarios"
+    )
+
+    def _compute_scenario_count(self):
+        counts = self.env["spreadsheet.scenario"].read_group(
+            [("spreadsheet_id", "in", self.ids), ("active", "=", True)],
+            ["spreadsheet_id"],
+            ["spreadsheet_id"],
+        )
+        count_map = {c["spreadsheet_id"][0]: c["spreadsheet_id_count"] for c in counts}
+        for rec in self:
+            rec.scenario_count = count_map.get(rec.id, 0)
+
+    def action_open_scenarios(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("What-If Scenarios"),
+            "res_model": "spreadsheet.scenario",
             "view_mode": "list,form",
             "domain": [("spreadsheet_id", "=", self.id)],
             "context": {"default_spreadsheet_id": self.id},
