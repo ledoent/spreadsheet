@@ -50,8 +50,9 @@ _OP_FUNCS = {
     "!=": _op.ne,
 }
 
-# Alias kept for any code that imported _CELL_REF_RE directly (none in our suite,
-# but guard against future breakage).  Validation now delegates to cell_ref helpers.
+# Validation uses parse_cell_ref from cell_ref (imported above) instead of a
+# local compiled regex.  The module-level _CELL_REF_RE and _parse_cell_ref
+# helpers are no longer defined here; see models/cell_ref.py.
 
 
 class SpreadsheetAlert(models.Model):

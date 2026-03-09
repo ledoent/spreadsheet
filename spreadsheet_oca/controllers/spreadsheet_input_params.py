@@ -14,7 +14,6 @@ class SpreadsheetInputParamsController(Controller):
         "/spreadsheet/input_params/<int:spreadsheet_id>",
         type="json",
         auth="user",
-        methods=["POST"],
     )
     def get_input_params(self, spreadsheet_id):
         """Return ``{name: current_value}`` for all active parameters on this spreadsheet."""

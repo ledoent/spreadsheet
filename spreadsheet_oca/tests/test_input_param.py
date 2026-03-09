@@ -193,7 +193,10 @@ class TestInputParam(TransactionCase):
 
     def test_duplicate_name_raises(self):
         self._make_param(name="dup_param")
-        with self.assertRaises(Exception):  # IntegrityError / ValidationError
+        # SQL UNIQUE constraint propagates as psycopg2.errors.UniqueViolation
+        # (IntegrityError subclass).  Catch broadly to stay decoupled from
+        # psycopg2 internals and compatible across Odoo versions.
+        with self.assertRaises(Exception):
             self._make_param(name="dup_param")
 
     # ── Sync from spreadsheet ─────────────────────────────────────────────────
@@ -218,6 +221,27 @@ class TestInputParam(TransactionCase):
         p._sync_from_spreadsheet()
         self.assertFalse(p.current_value)
         self.assertTrue(p.last_synced)
+
+    def test_action_sync_now(self):
+        """action_sync_now() is a thin wrapper that calls _sync_from_spreadsheet."""
+        self.spreadsheet.write({"spreadsheet_raw": self.raw_with_b3})
+        p = self._make_param(name="sd_action")
+        p.action_sync_now()
+        self.assertEqual(p.current_value, "2026-01-01")
+
+    def test_sync_all_for_spreadsheet(self):
+        """_sync_all_for_spreadsheet syncs all active params for a given spreadsheet."""
+        self.spreadsheet.write({"spreadsheet_raw": self.raw_with_b3})
+        p1 = self._make_param(name="sa_p1")
+        p2 = self._make_param(name="sa_p2", cell_ref="B3")
+        p3 = self._make_param(name="sa_p3", active=False)  # archived — should be skipped
+        self.env["spreadsheet.input_param"]._sync_all_for_spreadsheet(self.spreadsheet.id)
+        p1.invalidate_recordset()
+        p2.invalidate_recordset()
+        p3.invalidate_recordset()
+        self.assertEqual(p1.current_value, "2026-01-01")
+        self.assertEqual(p2.current_value, "2026-01-01")
+        self.assertFalse(p3.current_value)  # archived param not synced
 
     # ── Domain template substitution ─────────────────────────────────────────
 

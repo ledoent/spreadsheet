@@ -21,7 +21,7 @@ import re
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from .cell_ref import parse_cell_key
+from .cell_ref import parse_cell_key, read_cell_value
 
 # Matches optional "SheetName!" prefix followed by a standard cell address.
 # Sheet name can contain any non-'!' characters (spaces, digits, etc.).
@@ -265,34 +265,15 @@ class SpreadsheetScenario(models.Model):
             }
 
         source_raw = self.spreadsheet_id.sudo().spreadsheet_raw or {}
-        sheets = source_raw.get("sheets", [])
-
-        def _read_base_value(sheet_name, col_idx, row_idx):
-            """Read the current value stored in spreadsheet_raw for a given cell."""
-            target_sheet = None
-            if sheet_name:
-                for s in sheets:
-                    if s.get("name", "").lower() == sheet_name.lower():
-                        target_sheet = s
-                        break
-            if target_sheet is None and sheets:
-                target_sheet = sheets[0]
-            if target_sheet is None:
-                return None
-            cells = target_sheet.get("cells", {})
-            row_map = cells.get(str(row_idx), {})
-            cell_data = row_map.get(str(col_idx), {})
-            if not cell_data:
-                return None
-            # Prefer the evaluated 'value'; fall back to 'content'.
-            return cell_data.get("value", cell_data.get("content", None))
 
         rows_html = []
         for key, override_val in overrides.items():
             sheet_name, col_idx, row_idx = _parse_override_key(key)
             if col_idx is None:
                 continue
-            base_val = _read_base_value(sheet_name, col_idx, row_idx)
+            # Reconstruct a cell_ref string that read_cell_value can parse.
+            addr = key if not sheet_name else key.split("!", 1)[1]
+            base_val = read_cell_value(source_raw, addr, sheet_name or None)
             base_display = str(base_val) if base_val is not None else _("(empty)")
             override_display = str(override_val) if override_val is not None else _("(null/clear)")
             rows_html.append(
