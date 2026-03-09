@@ -2,6 +2,46 @@
 <!-- Copyright 2026 Ledo Enterprises
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
+    <!-- ── Search view ───────────────────────────────────────────── -->
+    <record model="ir.ui.view" id="spreadsheet_alert_search_view">
+        <field name="name">spreadsheet.alert.search</field>
+        <field name="model">spreadsheet.alert</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="spreadsheet_id" />
+                <separator />
+                <filter
+                    name="in_alert"
+                    string="Currently Firing"
+                    domain="[('last_state', '=', True)]"
+                />
+                <filter
+                    name="active"
+                    string="Active"
+                    domain="[('active', '=', True)]"
+                />
+                <filter
+                    name="archived"
+                    string="Archived"
+                    domain="[('active', '=', False)]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="by_spreadsheet"
+                        string="Spreadsheet"
+                        context="{'group_by': 'spreadsheet_id'}"
+                    />
+                    <filter
+                        name="by_trigger"
+                        string="Trigger Mode"
+                        context="{'group_by': 'trigger_mode'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- ── List view ─────────────────────────────────────────────── -->
     <record model="ir.ui.view" id="spreadsheet_alert_list_view">
         <field name="name">spreadsheet.alert.list</field>
@@ -45,9 +85,9 @@
                     <button
                         name="action_reset_state"
                         type="object"
-                        string="Reset Edge State"
+                        string="Allow Re-trigger"
                         invisible="trigger_mode != 'edge' or not last_state"
-                        title="Reset so the alert can fire again next time"
+                        title="Clear the triggered state so this alert can fire again on the next evaluation"
                     />
                     <field name="active" invisible="1" />
                 </header>
@@ -78,7 +118,12 @@
                             <field name="operator" class="oe_inline" />
                             <field name="threshold" class="oe_inline" />
                         </div>
-                        <field name="trigger_mode" />
+                        <field
+                            name="trigger_mode"
+                            help="Edge: notify once when the condition first becomes true,
+then wait for it to go false and true again.
+Level: notify on every evaluation cycle while the condition holds."
+                        />
                     </group>
                     <group string="Notifications">
                         <field
@@ -98,6 +143,16 @@
         <field name="name">KPI Alerts</field>
         <field name="res_model">spreadsheet.alert</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+    </record>
+
+    <!-- ── Menu item ─────────────────────────────────────────────── -->
+    <record model="ir.ui.menu" id="spreadsheet_alert_menu">
+        <field name="name">KPI Alerts</field>
+        <field name="parent_id" ref="spreadsheet_oca.spreadsheet_spreadsheet_configuration_menu" />
+        <field name="action" ref="spreadsheet_alert_act_window" />
+        <field name="groups_id" eval="[(4, ref('spreadsheet_oca.group_manager'))]" />
+        <field name="sequence" eval="21" />
     </record>
 
     <!-- ── Smart button on spreadsheet form ─────────────────────── -->

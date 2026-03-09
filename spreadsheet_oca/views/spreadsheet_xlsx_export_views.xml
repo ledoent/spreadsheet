@@ -11,9 +11,11 @@
                 <button
                     name="action_export_xlsx"
                     type="object"
-                    string="Export XLSX"
-                    icon="fa-download"
+                    string="Export Pivot Data"
+                    icon="fa-table"
                     class="btn-secondary"
+                    title="Generate an .xlsx file with fresh server-side pivot data
+(distinct from the editor's File → Download which exports the full spreadsheet)"
                 />
             </xpath>
         </field>

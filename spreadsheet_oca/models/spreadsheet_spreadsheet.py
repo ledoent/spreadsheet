@@ -61,7 +61,7 @@ class SpreadsheetSpreadsheet(models.Model):
 
     def _compute_refresh_schedule_count(self):
         counts = self.env["spreadsheet.refresh.schedule"].read_group(
-            [("spreadsheet_id", "in", self.ids)],
+            [("spreadsheet_id", "in", self.ids), ("active", "=", True)],
             ["spreadsheet_id"],
             ["spreadsheet_id"],
         )
@@ -75,7 +75,7 @@ class SpreadsheetSpreadsheet(models.Model):
 
     def _compute_alert_count(self):
         counts = self.env["spreadsheet.alert"].read_group(
-            [("spreadsheet_id", "in", self.ids)],
+            [("spreadsheet_id", "in", self.ids), ("active", "=", True)],
             ["spreadsheet_id"],
             ["spreadsheet_id"],
         )
