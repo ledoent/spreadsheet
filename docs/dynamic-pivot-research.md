@@ -353,6 +353,191 @@ server data.
 
 ## 8. What We Are NOT Doing
 
+---
+
+## 9. Future Directions — Innovative Features Beyond Enterprise
+
+Research conducted March 2026. Sources: o-spreadsheet GitHub releases, OCA/spreadsheet issues,
+Odoo 19 docs, Sigma Computing, Hex, Rows.com, Causal, Metabase, Google Connected Sheets,
+Microsoft Power BI 2025 feature releases.
+
+### 9.1 What Odoo 19 Enterprise Is Shipping (for reference)
+
+| Feature | Notes |
+|---------|-------|
+| Dynamic `=PIVOT()` spill formula | Already in OCA via `pivotMode: "dynamic"` (Phase 3) |
+| Collapse/expand pivot subgroup rows | JS-only UI change; portable |
+| Sort pivot rows by measure value | JS-only; portable |
+| Filter pivot rows by numeric threshold | JS-only; portable |
+| Pivot conditional styling | JS plugin; portable |
+| Radar chart type | JS-only |
+| Command palette (Ctrl+K) | JS-only |
+| Computed/calculated measures (custom KPIs) | 19.0; JS formula plugin |
+| Relational drill-down (group by related model fields) | 19.0; requires ORM changes |
+| `ODOO.SURVEY` formula function | 19.0; survey module integration |
+| Create pivot from scratch (no pivot view needed) | 18.0; already available |
+| Global filters (date/partner/analytic across all sources) | 18.0; OCA gap — not yet ported |
+
+The spill formula is already ours. Most of the rest are JS-side UI enhancements that could
+be ported to `spreadsheet_oca` without Python changes. Global Filters (18.0) is the biggest
+Enterprise-only feature worth porting — it affects every multi-pivot dashboard.
+
+**Confirmed missing from both CE and Enterprise (no open issue, no roadmap item found):**
+- Writeback (cell → Odoo record update)
+- Drill-through to source records (pivot cell → filtered list view)
+- Scheduled/cron-based auto-refresh
+- Cell threshold alerts / KPI notifications
+- Named scenario manager
+
+OCA open issues relevant to this work:
+- **Issue #18** — "pivot tables don't auto-insert new rows when new periods appear" (the
+  original static-snapshot problem; our Phase 2 fixes this)
+- **Issue #74** — Sale/Purchase order integration as a data source
+
+---
+
+### 9.2 Features Neither CE Nor Enterprise Has
+
+Scored on Feasibility (A), User Value (B), Differentiation (C). Scale 1–5 each.
+
+#### 🥇 1. Scheduled Cron Refresh — Score 15/15
+
+An `ir.cron` per spreadsheet that re-runs all pivot/list data sources and writes fresh data
+back into `spreadsheet_raw`. Optionally posts a Chatter message with a diff summary.
+
+**Why now:** The `get_pivot_data()` Python method (Phase 1) and `_refreshAndReinsertAllPivots()`
+JS function (Phase 2) already exist. The cron just calls the server-side equivalent.
+
+**What to build:**
+- `spreadsheet.refresh.schedule` model: `(spreadsheet_id, cron_id, last_run, notify_follower_ids)`
+- `ir.cron` created/linked on schedule save
+- Cron method calls `get_pivot_data()` for each pivot in the JSON → patches `spreadsheet_raw`
+
+**Comps:** Rows.com per-minute scheduled refresh; Metabase dashboard subscriptions.
+
+**Effort:** ~3 days (Python-heavy, no complex JS needed).
+
+---
+
+#### 🥈 2. Threshold Alerts / KPI Watches — Score 14/15
+
+`spreadsheet.alert` model: `(spreadsheet_id, cell_ref, operator, threshold, notify_user_ids,
+trigger_mode: edge|level)`. A cron evaluates a named cell's value from the spreadsheet JSON
+and fires a `mail.message` / Discuss notification when the threshold is crossed.
+
+**Why feasible:** `pivot_data.py` already computes numeric aggregates. Chatter is already on
+`spreadsheet.spreadsheet`. Reading a cell's computed value from the JSON state is trivial.
+
+**Comps:** Metabase Goal Line Alerts, Power BI Anomaly Alerts, Apache Superset threshold
+notifications.
+
+**Effort:** ~2 days. Best implemented alongside cron refresh (shares the eval loop).
+
+---
+
+#### 3. Pivot Drill-Through to Source Records — Score 12/15 (lowest effort of top tier)
+
+Double-click a pivot cell → opens an `ir.actions.act_window` tree view filtered to the
+exact domain for that cell's aggregate.
+
+**Why trivial:** `pivot_data.py` already stores `"domain": rg.get("__domain", [])` in every
+group entry. The JS handler just reads that domain from the data source and calls `do_action`.
+
+**Additive over Odoo 19:** Enterprise 19 has pivot expand/collapse but not drill-through to
+a filtered source record list view.
+
+**Effort:** ~1 day.
+
+---
+
+#### 4. Input Cells / Parameterized Data Sources — Score 13/15
+
+Mark specific cells as "input parameters." When inserting a pivot/list, allow its domain to
+reference a named input cell value. The JS data source re-queries when the input cell changes.
+
+**Comps:** Google Sheets `@PARAMETER_NAME` in Connected Sheets SQL, Sigma Input Tables.
+Enterprise has Global Filters (date/partner/analytic only); input cells would be freeform,
+formula-driveable, model-agnostic.
+
+**Effort:** ~4 days (JS plugin architecture work).
+
+---
+
+#### 5. Named Scenarios / What-If Manager — Score 13/15
+
+`spreadsheet.scenario` model: `(spreadsheet_id, name, overrides: JSON {cell_ref: value})`.
+A scenario switcher applies cell value overrides without touching the base spreadsheet. A
+comparison view shows side-by-side diff between scenarios.
+
+**Comps:** Excel Scenario Manager, Causal (built an entire product around this pattern).
+Natural fit for Odoo budget/tax planning use cases.
+
+**Effort:** ~3 days (JS-heavy; Python model is simple).
+
+---
+
+#### 6. Server-Side XLSX Headless Generation — Score 12/15 + time advantage
+
+An `ir.actions.report` (or wizard) that produces an `.xlsx` from a `spreadsheet.spreadsheet`
+record using `openpyxl`, triggerable from cron or a "Download as XLSX" action.
+
+**Time-sensitive:** `odoo/o-spreadsheet` Issue #8061 was filed **March 6 2026** — days before
+this research. Odoo SA has not responded. Building this in `spreadsheet_oca` first gives us
+OCA upstream credit and early-mover advantage before any competing PR.
+
+**Effort:** ~4 days (`openpyxl` rendering of pivot/list tables; JSON parse of spreadsheet state).
+
+---
+
+#### 7. Writeback: Edit Cells → Update Odoo Records — Score 13/15 (highest wow factor)
+
+Edit a cell in a linked List range → call `env[model].write({field: value})` for that record
+via an explicit "Commit" action (no auto-save). Protected by normal Odoo field-level ACL.
+
+**Comps:** Sigma Input Tables, Hex writeback cells. **Enterprise does NOT support this.** An
+unanswered Odoo forum thread explicitly asks for it.
+
+**Effort:** ~5 days (controller, ACL guards, JS undo integration).
+
+---
+
+#### 8. Dashboard Subscriptions (Scheduled Email Digest) — Score 12/15
+
+Users subscribe to a spreadsheet or a named range. A cron renders the range as an HTML table
+and emails it to subscribers on a schedule (daily/weekly/monthly). Per-subscriber filter
+override if combined with feature #4 (input cells).
+
+**Comps:** Metabase dashboard subscriptions (flagship feature). Finance teams wanting weekly
+KPI emails without logging into Odoo.
+
+**Effort:** ~3 days (cron + `mail.mail` + HTML table renderer from JSON cells).
+
+---
+
+### 9.3 Priority Build Order
+
+Given current state (Phase 1 Python spike ✅, Phase 2 refresh ✅):
+
+```
+Immediate (low effort, high value):
+  3. Pivot drill-through to source records    ~1 day  uses existing __domain data
+
+Next sprint:
+  1. Scheduled cron refresh                  ~3 days  uses pivot_data.py
+  2. Threshold alerts                        ~2 days  piggybacks on cron loop
+
+After proving value:
+  6. Headless XLSX                           ~4 days  timely OCA opportunity (Issue #8061)
+  5. Named scenarios                         ~3 days  JS-heavy
+  7. Writeback                               ~5 days  needs careful ACL work
+  4. Input cells                             ~4 days  enables filter-driven dashboards
+```
+
+**Total for items 1–3:** ~6 days → delivers "live dashboards with alerts" that neither
+Odoo CE nor Enterprise can match.
+
+---
+
 - **Pivot domain editor in side panel** — Enterprise has a Domain Selector
   widget in the pivot side panel. Not in scope; too much UI surface area.
 - **`PIVOT.POSITION()` / legacy formula migration** — Enterprise has tooling to
