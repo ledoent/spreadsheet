@@ -83,9 +83,9 @@ Key components Enterprise has that OCA lacks:
 | `OdooPivotLoader` JS class | `spreadsheet/static/src/pivot/` | ❌ None |
 | `PIVOT.VALUE()` formula function | `spreadsheet/static/src/pivot/pivot_functions.js` | ❌ None |
 | `PIVOT.HEADER()` formula function | same | ❌ None |
-| `REFRESH_PIVOT` command handler | pivot plugin | ❌ Unregistered |
-| `REFRESH_ALL_DATA_SOURCES` handler | core plugin | ❌ Unregistered |
-| Filter → pivot domain update plugin | `pivot_ui_global_filter_plugin.js` | ❌ None |
+| `REFRESH_PIVOT` command handler | `o_spreadsheet.js` core pivot plugin | ✅ Already in CE `spreadsheet` |
+| `REFRESH_ALL_DATA_SOURCES` handler | `PivotOdooUIPlugin`, `ListUIPlugin` | ✅ Already in CE `spreadsheet` |
+| Filter → pivot domain update plugin | `pivot_ui_global_filter_plugin.js` | ✅ Already in CE `spreadsheet` |
 
 ---
 
@@ -159,20 +159,33 @@ before any JS work.
 
 ---
 
-### Phase 2 — Register Missing Commands (~1 day)
+### Phase 2 — Fix Pivot Refresh (~1 day) ✅ DONE
 
-Wire up the commands that exist in the UI but are no-ops:
+**Correction from initial analysis:** `REFRESH_PIVOT` and `REFRESH_ALL_DATA_SOURCES`
+are *already registered* by the CE `spreadsheet` addon's plugins
+(`PivotOdooUIPlugin`, `ListUIPlugin`, `OdooChartUIPlugin` in `spreadsheet/static/src/index.js`).
+These plugins are loaded into the `coreViewsPluginRegistry` and are active whenever
+`SpreadsheetRenderer` creates a `new Model(...)`.
 
-1. **`REFRESH_ALL_DATA_SOURCES`** — iterate all pivot IDs, call
-   `ds.load({ reload: true })` on each, then re-render. This gives "Refresh
-   all data" menu item actual behaviour.
+The real bugs were:
 
-2. **`REFRESH_PIVOT`** — same but for a single pivot ID.
+1. **`reinsertTable` read stale data** — "Re-insert Dynamic/Static" (cog menu) called
+   `getPivot(id).getTableStructure().export()` *before* `REFRESH_PIVOT` completed.
+   Since `pivot.init({ reload: true })` is async, the re-inserted table always
+   contained the data from the previous `ds.load()` call.
 
-These are pure JS additions to the bundle, no Python changes. Gives immediate
-visible value: user can click "Refresh all data" and the pivot updates.
+   **Fix:** Made `reinsertTable` async; now `await pivot.load({ reload: true })`
+   before reading `getTableStructure()`.
 
-**Files:** new `bundle/pivot_commands.esm.js` + register in `spreadsheet.xml`.
+2. **"Refresh all data" had no visible effect** — The CE handler reloads pivot data
+   sources but cells are static values (not formulas). Data source refresh only
+   updates formula cells (`PIVOT.VALUE(...)`), which OCA doesn't use yet.
+
+   **Fix:** Changed "Refresh all data" execute to: scan all sheets for pivot anchor
+   positions → reload all pivots concurrently → re-insert each table at its anchor.
+   Then still dispatches `REFRESH_ALL_DATA_SOURCES` so lists and charts update too.
+
+**Files changed:** `bundle/filter_panel_datasources.esm.js` only.
 
 ---
 
