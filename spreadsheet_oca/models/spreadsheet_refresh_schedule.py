@@ -90,7 +90,7 @@ class SpreadsheetRefreshSchedule(models.Model):
                 )
             else:
                 model_id = (
-                    self.env["ir.model"].sudo()._get("spreadsheet.refresh.schedule").id
+                    self.env["ir.model"].sudo()._get(self._name).id
                 )
                 cron = self.env["ir.cron"].sudo().create(
                     {
@@ -147,10 +147,12 @@ class SpreadsheetRefreshSchedule(models.Model):
             return
 
         summaries = []
+        failed_pivot_names = []
         for pivot_id, pivot_def in pivots.items():
             if pivot_def.get("type") != "ODOO":
                 continue
             model_name = pivot_def.get("model")
+            pivot_name = pivot_def.get("name") or _("Pivot #%s") % pivot_id
             if not model_name or model_name not in self.env:
                 _logger.warning(
                     "Spreadsheet refresh %s: unknown model %r — skipping pivot %s",
@@ -158,6 +160,7 @@ class SpreadsheetRefreshSchedule(models.Model):
                     model_name,
                     pivot_id,
                 )
+                failed_pivot_names.append(pivot_name)
                 continue
             try:
                 result = _get_pivot_data(
@@ -171,7 +174,7 @@ class SpreadsheetRefreshSchedule(models.Model):
                 )
                 summaries.append(
                     {
-                        "name": pivot_def.get("name") or _("Pivot #%s") % pivot_id,
+                        "name": pivot_name,
                         "model": model_name,
                         "result": result,
                     }
@@ -182,6 +185,7 @@ class SpreadsheetRefreshSchedule(models.Model):
                     self.id,
                     pivot_id,
                 )
+                failed_pivot_names.append(pivot_name)
 
         html = self._render_refresh_html(summaries)
         partner_ids = self.notify_partner_ids.ids
@@ -192,6 +196,19 @@ class SpreadsheetRefreshSchedule(models.Model):
             partner_ids=partner_ids,
             subtype_xmlid="mail.mt_comment" if partner_ids else "mail.mt_note",
         )
+
+        if failed_pivot_names:
+            spreadsheet.sudo().message_post(
+                body=_(
+                    "<p>⚠️ Refresh schedule <b>%(schedule)s</b> could not load "
+                    "pivot(s): %(pivots)s. Check server logs for details.</p>"
+                )
+                % {
+                    "schedule": self.name,
+                    "pivots": ", ".join(f"<b>{n}</b>" for n in failed_pivot_names),
+                },
+                subtype_xmlid="mail.mt_note",
+            )
 
         self.sudo().write({"last_run": fields.Datetime.now()})
 

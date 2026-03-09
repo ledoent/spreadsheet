@@ -17,6 +17,8 @@ Two trigger modes:
 Operators: >, >=, <, <=, ==, !=
 """
 import logging
+import operator as _op
+import re
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -36,6 +38,19 @@ _TRIGGER_MODES = [
     ("edge", "Edge — notify once when threshold is first crossed"),
     ("level", "Level — notify every cycle the condition holds"),
 ]
+
+# Maps operator selection values to Python comparison callables.
+_OP_FUNCS = {
+    ">": _op.gt,
+    ">=": _op.ge,
+    "<": _op.lt,
+    "<=": _op.le,
+    "==": _op.eq,
+    "!=": _op.ne,
+}
+
+# Pre-compiled cell reference pattern (module-level for efficiency).
+_CELL_REF_RE = re.compile(r"^[A-Za-z]+[1-9][0-9]*$")
 
 
 class SpreadsheetAlert(models.Model):
@@ -103,11 +118,8 @@ class SpreadsheetAlert(models.Model):
 
     @api.constrains("cell_ref")
     def _check_cell_ref(self):
-        import re
-
-        pattern = re.compile(r"^[A-Za-z]+[1-9][0-9]*$")
         for rec in self:
-            if not pattern.match(rec.cell_ref.strip()):
+            if not _CELL_REF_RE.match(rec.cell_ref.strip()):
                 raise ValidationError(
                     _("Cell reference %r must be in the form 'A1', 'B12', etc.")
                     % rec.cell_ref
@@ -160,21 +172,9 @@ class SpreadsheetAlert(models.Model):
         )
 
     def _check_condition(self, value):
-        op = self.operator
-        t = self.threshold
-        if op == ">":
-            return value > t
-        if op == ">=":
-            return value >= t
-        if op == "<":
-            return value < t
-        if op == "<=":
-            return value <= t
-        if op == "==":
-            return value == t
-        if op == "!=":
-            return value != t
-        return False
+        """Return True if value satisfies operator(value, threshold)."""
+        func = _OP_FUNCS.get(self.operator)
+        return func(value, self.threshold) if func else False
 
     def _read_cell_value(self):
         """
@@ -223,8 +223,9 @@ class SpreadsheetAlert(models.Model):
         if content is None or content == "":
             return None
 
-        # Formulas store the formula string; the evaluated value is in
-        # 'evaluatedFormula' or we fall back to trying to parse as float.
+        # o-spreadsheet stores the last-computed result in 'value' (set when
+        # the spreadsheet is saved after formula evaluation in the browser).
+        # Fall back to parsing 'content' as float for static numeric cells.
         evaluated = cell_data.get("value")
         if evaluated is None:
             # Try raw content as numeric

@@ -299,13 +299,21 @@ class SpreadsheetXlsxExporter:
             cell.font = _PIVOT_HEADER_FONT
             cell.alignment = Alignment(horizontal="center")
 
-        # Total column
+        # Total column(s) — one per measure when multiple measures are used
         total_col = num_row_dims + len(col_keys) * len(measure_specs) + 1
-        ws.cell(row=r, column=total_col, value=_("Total")).fill = _PIVOT_HEADER_FILL
-        ws.cell(row=r, column=total_col).font = _PIVOT_HEADER_FONT
+        if len(measure_specs) > 1:
+            ws.merge_cells(
+                start_row=r, start_column=total_col,
+                end_row=r, end_column=total_col + len(measure_specs) - 1,
+            )
+        total_hdr = ws.cell(row=r, column=total_col, value=_("Total"))
+        total_hdr.fill = _PIVOT_HEADER_FILL
+        total_hdr.font = _PIVOT_HEADER_FONT
+        if len(measure_specs) > 1:
+            total_hdr.alignment = Alignment(horizontal="center")
         r += 1
 
-        # Measure sub-headers if multiple measures
+        # Measure sub-headers if multiple measures (including total columns)
         if len(measure_specs) > 1:
             for ki in range(len(col_keys)):
                 for si, spec in enumerate(measure_specs):
@@ -313,6 +321,11 @@ class SpreadsheetXlsxExporter:
                     cell = ws.cell(row=r, column=col_start, value=_format_measure_name(spec))
                     cell.fill = _PIVOT_SUBHEADER_FILL
                     cell.font = _PIVOT_SUBHEADER_FONT
+            # Also add sub-headers for the total section
+            for si, spec in enumerate(measure_specs):
+                cell = ws.cell(row=r, column=total_col + si, value=_format_measure_name(spec))
+                cell.fill = _PIVOT_SUBHEADER_FILL
+                cell.font = _PIVOT_SUBHEADER_FONT
             r += 1
 
         # ── Data rows ─────────────────────────────────────────────────────────
@@ -326,23 +339,25 @@ class SpreadsheetXlsxExporter:
                     col_pos = num_row_dims + ki * len(measure_specs) + si + 1
                     val = cell_group.get("measures", {}).get(spec) if cell_group else None
                     ws.cell(row=r, column=col_pos, value=val)
-            # Row total
+            # Row totals — one column per measure
             row_total = [g for g in groups
                          if g["rowGroupBy"] == row_gb and not g["colGroupBy"]
                          and tuple(g["rowValues"]) == row_key]
-            if row_total and measure_specs:
-                val = row_total[0].get("measures", {}).get(measure_specs[0])
-                ws.cell(row=r, column=total_col, value=val).font = _PIVOT_TOTAL_FONT
+            if row_total:
+                for si, spec in enumerate(measure_specs):
+                    v = row_total[0].get("measures", {}).get(spec)
+                    ws.cell(row=r, column=total_col + si, value=v).font = _PIVOT_TOTAL_FONT
             r += 1
 
-        # Grand total row
+        # Grand total row — one column per measure
         if grand_totals:
             gt = grand_totals[0]
-            cell = ws.cell(row=r, column=1, value=_("Grand Total"))
-            cell.font = _PIVOT_TOTAL_FONT
-            if len(measure_specs) > 0:
-                ws.cell(row=r, column=total_col,
-                        value=gt.get("measures", {}).get(measure_specs[0])).font = _PIVOT_TOTAL_FONT
+            ws.cell(row=r, column=1, value=_("Grand Total")).font = _PIVOT_TOTAL_FONT
+            for si, spec in enumerate(measure_specs):
+                ws.cell(
+                    row=r, column=total_col + si,
+                    value=gt.get("measures", {}).get(spec),
+                ).font = _PIVOT_TOTAL_FONT
             r += 1
 
         return r + 1
