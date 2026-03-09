@@ -55,6 +55,30 @@ class SpreadsheetSpreadsheet(models.Model):
     spreadsheet_tag_ids = fields.Many2many(
         string="Tags", comodel_name="spreadsheet.spreadsheet.tag"
     )
+    refresh_schedule_count = fields.Integer(
+        compute="_compute_refresh_schedule_count", string="Refresh Schedules"
+    )
+
+    def _compute_refresh_schedule_count(self):
+        counts = self.env["spreadsheet.refresh.schedule"].read_group(
+            [("spreadsheet_id", "in", self.ids)],
+            ["spreadsheet_id"],
+            ["spreadsheet_id"],
+        )
+        count_map = {c["spreadsheet_id"][0]: c["spreadsheet_id_count"] for c in counts}
+        for rec in self:
+            rec.refresh_schedule_count = count_map.get(rec.id, 0)
+
+    def action_open_refresh_schedules(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Refresh Schedules"),
+            "res_model": "spreadsheet.refresh.schedule",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
 
     @api.depends("name")
     def _compute_filename(self):
