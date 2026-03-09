@@ -69,6 +69,31 @@ class SpreadsheetSpreadsheet(models.Model):
         for rec in self:
             rec.refresh_schedule_count = count_map.get(rec.id, 0)
 
+    alert_count = fields.Integer(
+        compute="_compute_alert_count", string="KPI Alerts"
+    )
+
+    def _compute_alert_count(self):
+        counts = self.env["spreadsheet.alert"].read_group(
+            [("spreadsheet_id", "in", self.ids)],
+            ["spreadsheet_id"],
+            ["spreadsheet_id"],
+        )
+        count_map = {c["spreadsheet_id"][0]: c["spreadsheet_id_count"] for c in counts}
+        for rec in self:
+            rec.alert_count = count_map.get(rec.id, 0)
+
+    def action_open_alerts(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("KPI Alerts"),
+            "res_model": "spreadsheet.alert",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
     def action_open_refresh_schedules(self):
         self.ensure_one()
         return {

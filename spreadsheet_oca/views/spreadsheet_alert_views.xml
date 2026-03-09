@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 Ledo Enterprises
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <!-- ── List view ─────────────────────────────────────────────── -->
+    <record model="ir.ui.view" id="spreadsheet_alert_list_view">
+        <field name="name">spreadsheet.alert.list</field>
+        <field name="model">spreadsheet.alert</field>
+        <field name="arch" type="xml">
+            <list string="KPI Alerts" decoration-muted="not active">
+                <field name="name" />
+                <field name="spreadsheet_id" />
+                <field name="cell_ref" />
+                <field name="operator" />
+                <field name="threshold" />
+                <field name="trigger_mode" />
+                <field name="last_value" string="Last Value" />
+                <field name="last_checked" string="Last Checked" />
+                <field name="last_state" string="In Alert" widget="boolean" />
+                <field name="active" column_invisible="True" />
+                <button
+                    name="action_evaluate_now"
+                    type="object"
+                    string="Check Now"
+                    icon="fa-bolt"
+                    title="Evaluate alert now"
+                />
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ─────────────────────────────────────────────── -->
+    <record model="ir.ui.view" id="spreadsheet_alert_form_view">
+        <field name="name">spreadsheet.alert.form</field>
+        <field name="model">spreadsheet.alert</field>
+        <field name="arch" type="xml">
+            <form string="KPI Alert">
+                <header>
+                    <button
+                        name="action_evaluate_now"
+                        type="object"
+                        string="Check Now"
+                        class="btn-primary"
+                    />
+                    <button
+                        name="action_reset_state"
+                        type="object"
+                        string="Reset Edge State"
+                        invisible="trigger_mode != 'edge' or not last_state"
+                        title="Reset so the alert can fire again next time"
+                    />
+                    <field name="active" invisible="1" />
+                </header>
+                <sheet>
+                    <widget name="web_ribbon"
+                        title="Inactive"
+                        bg_color="bg-secondary"
+                        invisible="active"
+                    />
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="spreadsheet_id" />
+                        </group>
+                        <group>
+                            <field name="last_checked" />
+                            <field name="last_value" />
+                            <field name="last_state" string="Currently In Alert" />
+                        </group>
+                    </group>
+                    <group string="Cell to Watch">
+                        <field name="sheet_name" placeholder="Leave blank for first sheet" />
+                        <field name="cell_ref" placeholder="e.g. B3" />
+                    </group>
+                    <group string="Threshold Condition">
+                        <label for="operator" string="Alert when cell" />
+                        <div class="o_row">
+                            <field name="operator" class="oe_inline" />
+                            <field name="threshold" class="oe_inline" />
+                        </div>
+                        <field name="trigger_mode" />
+                    </group>
+                    <group string="Notifications">
+                        <field
+                            name="notify_partner_ids"
+                            widget="many2many_tags"
+                            placeholder="Leave empty to post a private note only"
+                        />
+                    </group>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Action ────────────────────────────────────────────────── -->
+    <record model="ir.actions.act_window" id="spreadsheet_alert_act_window">
+        <field name="name">KPI Alerts</field>
+        <field name="res_model">spreadsheet.alert</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ── Smart button on spreadsheet form ─────────────────────── -->
+    <record model="ir.ui.view" id="spreadsheet_spreadsheet_alert_button">
+        <field name="name">spreadsheet.spreadsheet.form.kpi_alert</field>
+        <field name="model">spreadsheet.spreadsheet</field>
+        <field name="inherit_id" ref="spreadsheet_oca.spreadsheet_spreadsheet_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    class="oe_stat_button"
+                    type="object"
+                    name="action_open_alerts"
+                    icon="fa-bell"
+                >
+                    <field
+                        string="KPI Alerts"
+                        name="alert_count"
+                        widget="statinfo"
+                    />
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>
