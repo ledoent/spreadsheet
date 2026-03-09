@@ -6,7 +6,7 @@ Tests for spreadsheet.alert (Feature 2 — Threshold Alerts / KPI Watches).
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase
 
-from ..models.spreadsheet_alert import _parse_cell_ref
+from ..models.cell_ref import parse_cell_ref as _parse_cell_ref
 
 
 class TestParseCellRef(TransactionCase):

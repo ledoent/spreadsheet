@@ -21,49 +21,14 @@ import re
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
+from .cell_ref import parse_cell_key
+
 # Matches optional "SheetName!" prefix followed by a standard cell address.
 # Sheet name can contain any non-'!' characters (spaces, digits, etc.).
 _OVERRIDE_KEY_RE = re.compile(r"^(?:[^!]+!)?[A-Za-z]+[1-9][0-9]*$")
 
-# Matches the column-letters + row-number portion of a cell address.
-_CELL_ADDR_RE = re.compile(r"^([A-Za-z]+)([1-9][0-9]*)$")
-
-
-def _parse_cell_addr(addr):
-    """
-    Parse a bare cell address like 'B3' or 'AA12' into (col_index, row_index).
-
-    Both indices are 0-based to match the o-spreadsheet JSON cell-map format.
-    Returns (None, None) on invalid input.
-    """
-    m = _CELL_ADDR_RE.match(addr.upper())
-    if not m:
-        return None, None
-    col_str, row_str = m.group(1), m.group(2)
-    col_idx = 0
-    for ch in col_str:
-        col_idx = col_idx * 26 + (ord(ch) - ord("A") + 1)
-    col_idx -= 1  # convert to 0-based
-    row_idx = int(row_str) - 1  # convert to 0-based
-    return col_idx, row_idx
-
-
-def _parse_override_key(key):
-    """
-    Split an override key into (sheet_name_or_None, col_idx, row_idx).
-
-    Supports two formats:
-      - ``"B3"``           — no sheet qualifier; sheet_name = None
-      - ``"Sheet1!B3"``    — explicit sheet qualifier
-    """
-    if "!" in key:
-        sheet_part, addr_part = key.split("!", 1)
-        sheet_name = sheet_part.strip()
-    else:
-        sheet_name = None
-        addr_part = key.strip()
-    col_idx, row_idx = _parse_cell_addr(addr_part)
-    return sheet_name, col_idx, row_idx
+# Aliases for backward compatibility and internal use.
+_parse_override_key = parse_cell_key
 
 
 class SpreadsheetScenario(models.Model):

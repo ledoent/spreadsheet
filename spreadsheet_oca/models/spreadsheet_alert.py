@@ -18,10 +18,11 @@ Operators: >, >=, <, <=, ==, !=
 """
 import logging
 import operator as _op
-import re
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+
+from .cell_ref import parse_cell_ref, read_cell_value
 
 _logger = logging.getLogger(__name__)
 
@@ -49,8 +50,8 @@ _OP_FUNCS = {
     "!=": _op.ne,
 }
 
-# Pre-compiled cell reference pattern (module-level for efficiency).
-_CELL_REF_RE = re.compile(r"^[A-Za-z]+[1-9][0-9]*$")
+# Alias kept for any code that imported _CELL_REF_RE directly (none in our suite,
+# but guard against future breakage).  Validation now delegates to cell_ref helpers.
 
 
 class SpreadsheetAlert(models.Model):
@@ -119,7 +120,8 @@ class SpreadsheetAlert(models.Model):
     @api.constrains("cell_ref")
     def _check_cell_ref(self):
         for rec in self:
-            if not _CELL_REF_RE.match(rec.cell_ref.strip()):
+            col, _row = parse_cell_ref(rec.cell_ref.strip())
+            if col is None:
                 raise ValidationError(
                     _("Cell reference %r must be in the form 'A1', 'B12', etc.")
                     % rec.cell_ref
@@ -180,61 +182,19 @@ class SpreadsheetAlert(models.Model):
         """
         Read the current numeric value of the watched cell from spreadsheet_raw.
 
-        Strategy:
-          1. Parse the cell reference (e.g. 'B3') into (col_index, row_index).
-          2. Find the target sheet by name (or first sheet if sheet_name blank).
-          3. Read the cell's 'content' value from the JSON cell map.
-          4. Return as float, or None if not found / non-numeric.
+        Uses the shared ``read_cell_value`` helper to locate the cell, then
+        converts the result to float.  Returns None if the cell is absent or
+        non-numeric.
 
         Note: For formula cells (=PIVOT(…)), the stored value in spreadsheet_raw
-        is whatever was last computed client-side and saved. For pivots that were
-        refreshed via _run_refresh or opened in the browser recently, this will
-        be the latest aggregate value.
+        is whatever was last computed client-side and saved.
         """
         raw = self.spreadsheet_id.sudo().spreadsheet_raw or {}
-        sheets = raw.get("sheets", [])
-        if not sheets:
+        value = read_cell_value(raw, self.cell_ref.strip(), self.sheet_name or None)
+        if value is None:
             return None
-
-        # Resolve target sheet
-        target_sheet = None
-        if self.sheet_name:
-            for s in sheets:
-                if s.get("name", "").lower() == self.sheet_name.strip().lower():
-                    target_sheet = s
-                    break
-        if target_sheet is None:
-            target_sheet = sheets[0]
-
-        col_idx, row_idx = _parse_cell_ref(self.cell_ref.strip())
-        if col_idx is None:
-            return None
-
-        # Cell map: keyed by "col,row" (0-indexed) or by row then col
-        cells = target_sheet.get("cells", {})
-        # o-spreadsheet stores cells as {row: {col: {content, style, ...}}}
-        # Access: cells[str(row)][str(col)]
-        row_map = cells.get(str(row_idx), {})
-        cell_data = row_map.get(str(col_idx), {})
-        if not cell_data:
-            return None
-
-        content = cell_data.get("content", "")
-        if content is None or content == "":
-            return None
-
-        # o-spreadsheet stores the last-computed result in 'value' (set when
-        # the spreadsheet is saved after formula evaluation in the browser).
-        # Fall back to parsing 'content' as float for static numeric cells.
-        evaluated = cell_data.get("value")
-        if evaluated is None:
-            # Try raw content as numeric
-            try:
-                return float(str(content).replace(",", "."))
-            except (ValueError, TypeError):
-                return None
         try:
-            return float(evaluated)
+            return float(str(value).replace(",", "."))
         except (ValueError, TypeError):
             return None
 
@@ -274,22 +234,8 @@ class SpreadsheetAlert(models.Model):
         self.write({"last_state": False})
 
 
-def _parse_cell_ref(ref):
-    """
-    Parse a cell reference like 'B3' or 'AA12' into (col_index, row_index).
-
-    Both are 0-based to match the o-spreadsheet JSON cell map format.
-    Returns (None, None) on invalid input.
-    """
-    import re
-
-    m = re.match(r"^([A-Za-z]+)([1-9][0-9]*)$", ref)
-    if not m:
-        return None, None
-    col_str, row_str = m.group(1).upper(), m.group(2)
-    col_idx = 0
-    for ch in col_str:
-        col_idx = col_idx * 26 + (ord(ch) - ord("A") + 1)
-    col_idx -= 1  # 0-based
-    row_idx = int(row_str) - 1  # 0-based
-    return col_idx, row_idx
+# parse_cell_ref is imported from cell_ref at the top of this module.
+# The name is re-exported here so existing imports of the form
+#   ``from .spreadsheet_alert import _parse_cell_ref``
+# continue to work during the transition period.
+_parse_cell_ref = parse_cell_ref

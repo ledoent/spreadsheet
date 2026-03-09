@@ -21,6 +21,46 @@ from .pivot_data import _get_pivot_data
 
 _logger = logging.getLogger(__name__)
 
+
+def _apply_param_substitution(domain, params):
+    """
+    Replace ``%(name)s`` tokens in string leaf values of an Odoo domain list.
+
+    Only the *value* position (index 2) of ``(field, operator, value)`` tuples
+    is touched — field names and operators are never modified.  Nested domain
+    lists (e.g. ``["&", cond1, cond2]``) are handled recursively.
+
+    *params* is a ``{name: value}`` dict (values are already strings).
+    Safe: substituted values come from the DB, not from user input at runtime.
+
+    Example::
+
+        domain = [("date", ">=", "%(start_date)s")]
+        params = {"start_date": "2026-01-01"}
+        → [("date", ">=", "2026-01-01")]
+    """
+    if not isinstance(domain, list):
+        return domain
+    result = []
+    for item in domain:
+        if isinstance(item, (tuple, list)) and len(item) == 3:
+            field, op, value = item
+            if isinstance(value, str):
+                try:
+                    value = value % params
+                except KeyError as exc:
+                    _logger.warning(
+                        "Domain substitution: unknown param %s — token left as-is", exc
+                    )
+                except TypeError:
+                    pass  # value contained a lone % — leave unchanged
+            result.append((field, op, value))
+        elif isinstance(item, list):
+            result.append(_apply_param_substitution(item, params))
+        else:
+            result.append(item)
+    return result
+
 _INTERVAL_TYPES = [
     ("hours", "Hour(s)"),
     ("days", "Day(s)"),
@@ -134,6 +174,15 @@ class SpreadsheetRefreshSchedule(models.Model):
         """
         self.ensure_one()
         spreadsheet = self.spreadsheet_id
+
+        # Sync input parameters and build substitution dict before processing pivots.
+        self.env["spreadsheet.input_param"]._sync_all_for_spreadsheet(spreadsheet.id)
+        input_params = self.env["spreadsheet.input_param"].search([
+            ("spreadsheet_id", "=", spreadsheet.id),
+            ("active", "=", True),
+        ])
+        param_dict = {p.name: p.current_value or "" for p in input_params}
+
         raw = spreadsheet.sudo().spreadsheet_raw or {}
         pivots = raw.get("pivots", {})
 
@@ -163,10 +212,13 @@ class SpreadsheetRefreshSchedule(models.Model):
                 failed_pivot_names.append(pivot_name)
                 continue
             try:
+                domain = _apply_param_substitution(
+                    pivot_def.get("domain", []), param_dict
+                )
                 result = _get_pivot_data(
                     self.env,
                     model_name,
-                    pivot_def.get("domain", []),
+                    domain,
                     pivot_def.get("context", {}),
                     pivot_def.get("rows", []),
                     pivot_def.get("columns", []),

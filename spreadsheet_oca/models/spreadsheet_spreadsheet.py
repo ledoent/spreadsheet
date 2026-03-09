@@ -155,6 +155,34 @@ class SpreadsheetSpreadsheet(models.Model):
             "context": {"default_spreadsheet_id": self.id},
         }
 
+    input_param_count = fields.Integer(
+        compute="_compute_input_param_count", string="Input Parameters"
+    )
+
+    def _compute_input_param_count(self):
+        counts = self.env["spreadsheet.input_param"].read_group(
+            [("spreadsheet_id", "in", self.ids), ("active", "=", True)],
+            ["spreadsheet_id"],
+            ["spreadsheet_id"],
+        )
+        count_map = {c["spreadsheet_id"][0]: c["spreadsheet_id_count"] for c in counts}
+        for rec in self:
+            rec.input_param_count = count_map.get(rec.id, 0)
+
+    def action_open_input_params(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Input Parameters"),
+            "res_model": "spreadsheet.input_param",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {
+                "default_spreadsheet_id": self.id,
+                "search_default_active": 1,
+            },
+        }
+
     @api.depends("name")
     def _compute_filename(self):
         for record in self:
