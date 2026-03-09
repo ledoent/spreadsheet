@@ -514,27 +514,54 @@ KPI emails without logging into Odoo.
 
 ---
 
-### 9.3 Priority Build Order
+### 9.3 Build Status & Remaining Roadmap
 
-Given current state (Phase 1 Python spike ✅, Phase 2 refresh ✅):
+**Completed (branch `18.0-research-dynamic-pivot`):**
 
 ```
-Immediate (low effort, high value):
-  3. Pivot drill-through to source records    ~1 day  uses existing __domain data
-
-Next sprint:
-  1. Scheduled cron refresh                  ~3 days  uses pivot_data.py
-  2. Threshold alerts                        ~2 days  piggybacks on cron loop
-
-After proving value:
-  6. Headless XLSX                           ~4 days  timely OCA opportunity (Issue #8061)
-  5. Named scenarios                         ~3 days  JS-heavy
-  7. Writeback                               ~5 days  needs careful ACL work
-  4. Input cells                             ~4 days  enables filter-driven dashboards
+✅ Phase 1: Python pivot spike (pivot_data.py — _get_pivot_data via read_group)
+✅ Phase 2: Pivot refresh fix (RE-INSERT and Refresh all data work in CE)
+✅ Feature 1: Scheduled Cron Refresh (spreadsheet_refresh_schedule + tests)
+✅ Feature 2: KPI Threshold Alerts / Cell Watches (spreadsheet_alert + tests)
+✅ Feature 3: Pivot drill-through to source records (FREE — already in CE spreadsheet module)
+✅ Feature 6: Headless server-side XLSX Export (spreadsheet_xlsx_export + tests)
+   - 76 tests, 0 failures across all features
+   - UX polish pass: search views, menu items, fixed smart button xpath,
+     renamed 'Reset Edge State' → 'Allow Re-trigger', export disambiguation
+   - Quality pass: operator-module dispatch, module-level regex, multi-measure
+     crosstab totals fixed, failure chatter notifications added
 ```
 
-**Total for items 1–3:** ~6 days → delivers "live dashboards with alerts" that neither
-Odoo CE nor Enterprise can match.
+**Remaining (prioritized by value/effort):**
+
+```
+Next:
+  8. Dashboard Subscriptions       ~1-2 days  periodic digest email with table;
+                                              infrastructure already in Feature 1
+  5. Named Scenarios / What-If     ~3 days    Python model + JS switcher panel;
+                                              store override sets, switch live
+  4. Input Cells (Parameters)      ~4 days    mark cells as "inputs", JS sends
+                                              their values as pivot filter context
+  7. Writeback                     ~5 days    edit List view cells → model.write()
+                                              via controller; explicit Commit action;
+                                              highest wow factor, most ACL complexity
+```
+
+**Feature 8 (Dashboard Subscriptions) is the fastest next win:**
+- `spreadsheet.refresh.schedule` already emails partners on each run
+- What's missing: a standalone "subscription" model that users can self-subscribe
+  to without needing to configure a full refresh schedule; a nicer digest template
+  with embedded HTML table (Feature 1 already posts to chatter — email is there)
+- The addition: a `spreadsheet.subscription` model + subscribe/unsubscribe wizard +
+  a weekly digest cron that renders all pivot data to a styled HTML email
+
+**Feature 7 (Writeback) design notes:**
+- Add a `writeback_enabled` flag on `spreadsheet.spreadsheet`
+- JS: register a custom `LIST_RECORD_UPDATED` action in o-spreadsheet's command list
+- Controller: `POST /spreadsheet/writeback` validates field name, ACL, and calls
+  `env[model].browse(record_id).write({field: value})`
+- Safeguards: confirm dialog in JS, audit log (chatter message per write), rollback on error
+- This is the feature most likely to drive OCA acceptance of the whole PR
 
 ---
 
