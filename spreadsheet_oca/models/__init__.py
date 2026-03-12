@@ -1,3 +1,4 @@
+from . import cell_ref  # noqa: F401 — shared helpers; must be first
 from . import spreadsheet_abstract
 from . import spreadsheet_spreadsheet_tag
 from . import spreadsheet_spreadsheet

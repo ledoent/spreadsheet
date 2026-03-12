@@ -56,10 +56,40 @@ class SpreadsheetSpreadsheet(models.Model):
         string="Tags", comodel_name="spreadsheet.spreadsheet.tag"
     )
 
+    # ── DRY helper for read_group-based count fields ─────────────────────────
+
+    def _compute_related_count(self, comodel, field_name, extra_domain=None):
+        """Compute a count field by grouping *comodel* on ``spreadsheet_id``.
+
+        By default the domain filters on ``active=True``; pass *extra_domain*
+        to override (e.g. ``[("status", "!=", "error")]`` for writeback logs).
+        """
+        domain = [("spreadsheet_id", "in", self.ids)]
+        if extra_domain is not None:
+            domain += extra_domain
+        else:
+            domain.append(("active", "=", True))
+        counts = self.env[comodel].read_group(
+            domain, ["spreadsheet_id"], ["spreadsheet_id"]
+        )
+        count_map = {c["spreadsheet_id"][0]: c["spreadsheet_id_count"] for c in counts}
+        for rec in self:
+            rec[field_name] = count_map.get(rec.id, 0)
+
     @api.depends("name")
     def _compute_filename(self):
         for record in self:
-            record.filename = "%s.json" % (self.name or _("Unnamed"))
+            record.filename = f"{record.name or _('Unnamed')}.json"
+
+    # ── Pivot Data ────────────────────────────────────────────────────────────
+    @api.model
+    def get_pivot_data(self, model_name, domain, context, row_dims, col_dims, measures):
+        """Return pivot table data computed server-side (JSON-RPC entry point)."""
+        from .pivot_data import _get_pivot_data
+
+        return _get_pivot_data(
+            self.env, model_name, domain, context, row_dims, col_dims, measures
+        )
 
     def create_document_from_attachment(self, attachment_ids):
         attachments = self.env["ir.attachment"].browse(attachment_ids)
