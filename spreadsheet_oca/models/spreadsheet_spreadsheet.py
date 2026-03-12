@@ -81,6 +81,27 @@ class SpreadsheetSpreadsheet(models.Model):
         for record in self:
             record.filename = f"{record.name or _('Unnamed')}.json"
 
+    # ── Refresh Schedules ───────────────────────────────────────────────────
+    refresh_schedule_count = fields.Integer(
+        compute="_compute_refresh_schedule_count", string="Refresh Schedules"
+    )
+
+    def _compute_refresh_schedule_count(self):
+        self._compute_related_count(
+            "spreadsheet.refresh.schedule", "refresh_schedule_count"
+        )
+
+    def action_open_refresh_schedules(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Refresh Schedules"),
+            "res_model": "spreadsheet.refresh.schedule",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
     # ── Pivot Data ────────────────────────────────────────────────────────────
     @api.model
     def get_pivot_data(self, model_name, domain, context, row_dims, col_dims, measures):
