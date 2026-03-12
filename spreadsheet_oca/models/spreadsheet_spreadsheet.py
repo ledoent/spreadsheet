@@ -81,6 +81,25 @@ class SpreadsheetSpreadsheet(models.Model):
         for record in self:
             record.filename = f"{record.name or _('Unnamed')}.json"
 
+    # ── What-If Scenarios ──────────────────────────────────────────────────
+    scenario_count = fields.Integer(
+        compute="_compute_scenario_count", string="What-If Scenarios"
+    )
+
+    def _compute_scenario_count(self):
+        self._compute_related_count("spreadsheet.scenario", "scenario_count")
+
+    def action_open_scenarios(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("What-If Scenarios"),
+            "res_model": "spreadsheet.scenario",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
     # ── Pivot Data ────────────────────────────────────────────────────────────
     @api.model
     def get_pivot_data(self, model_name, domain, context, row_dims, col_dims, measures):
