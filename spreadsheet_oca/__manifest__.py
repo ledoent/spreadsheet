@@ -14,6 +14,7 @@
         "security/security.xml",
         "security/ir.model.access.csv",
         "views/spreadsheet_spreadsheet.xml",
+        "views/spreadsheet_xlsx_export_views.xml",
         "data/spreadsheet_spreadsheet_import_mode.xml",
         "wizards/spreadsheet_select_row_number.xml",
         "wizards/spreadsheet_spreadsheet_import.xml",

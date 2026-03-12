@@ -81,6 +81,45 @@ class SpreadsheetSpreadsheet(models.Model):
         for record in self:
             record.filename = f"{record.name or _('Unnamed')}.json"
 
+    # ── XLSX Export ──────────────────────────────────────────────────────────
+
+    def action_export_xlsx(self):
+        """Export this spreadsheet as .xlsx and return a download action."""
+        from .spreadsheet_xlsx_export import SpreadsheetXlsxExporter
+
+        self.ensure_one()
+        exporter = SpreadsheetXlsxExporter(self.env, self)
+        xlsx_bytes = exporter.render()
+
+        filename = f"{self.name or 'spreadsheet'}.xlsx"
+        attachment = self.env["ir.attachment"].create(
+            {
+                "name": filename,
+                "type": "binary",
+                "datas": base64.b64encode(xlsx_bytes),
+                "mimetype": (
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ),
+                "res_model": self._name,
+                "res_id": self.id,
+            }
+        )
+        return {
+            "type": "ir.actions.act_url",
+            "url": f"/web/content/{attachment.id}?download=true",
+            "target": "self",
+        }
+
+    @api.model
+    def get_xlsx_bytes(self, spreadsheet_id):
+        """Return raw .xlsx bytes (base64) for a spreadsheet."""
+        from .spreadsheet_xlsx_export import SpreadsheetXlsxExporter
+
+        spreadsheet = self.browse(spreadsheet_id)
+        spreadsheet.check_access("read")
+        exporter = SpreadsheetXlsxExporter(self.env, spreadsheet)
+        return base64.b64encode(exporter.render()).decode()
+
     # ── Pivot Data ────────────────────────────────────────────────────────────
     @api.model
     def get_pivot_data(self, model_name, domain, context, row_dims, col_dims, measures):
