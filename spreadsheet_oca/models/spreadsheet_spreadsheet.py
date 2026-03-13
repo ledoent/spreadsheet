@@ -81,6 +81,25 @@ class SpreadsheetSpreadsheet(models.Model):
         for record in self:
             record.filename = f"{record.name or _('Unnamed')}.json"
 
+    # ── Subscriptions ─────────────────────────────────────────────────────
+    subscriber_count = fields.Integer(
+        compute="_compute_subscriber_count", string="Subscribers"
+    )
+
+    def _compute_subscriber_count(self):
+        self._compute_related_count("spreadsheet.subscription", "subscriber_count")
+
+    def action_open_subscriptions(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Subscribers"),
+            "res_model": "spreadsheet.subscription",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
     # ── Pivot Data ────────────────────────────────────────────────────────────
     @api.model
     def get_pivot_data(self, model_name, domain, context, row_dims, col_dims, measures):
