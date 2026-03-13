@@ -15,6 +15,7 @@
         "security/ir.model.access.csv",
         "views/spreadsheet_spreadsheet.xml",
         "views/spreadsheet_refresh_schedule_views.xml",
+        "views/spreadsheet_input_param_views.xml",
         "data/mail_templates.xml",
         "data/spreadsheet_spreadsheet_import_mode.xml",
         "wizards/spreadsheet_select_row_number.xml",
