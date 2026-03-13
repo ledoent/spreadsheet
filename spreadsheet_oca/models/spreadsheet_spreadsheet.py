@@ -102,6 +102,23 @@ class SpreadsheetSpreadsheet(models.Model):
             "context": {"default_spreadsheet_id": self.id},
         }
 
+    # ── KPI Alerts ─────────────────────────────────────────────────────────
+    alert_count = fields.Integer(compute="_compute_alert_count", string="KPI Alerts")
+
+    def _compute_alert_count(self):
+        self._compute_related_count("spreadsheet.alert", "alert_count")
+
+    def action_open_alerts(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("KPI Alerts"),
+            "res_model": "spreadsheet.alert",
+            "view_mode": "list,form",
+            "domain": [("spreadsheet_id", "=", self.id)],
+            "context": {"default_spreadsheet_id": self.id},
+        }
+
     # ── Pivot Data ────────────────────────────────────────────────────────────
     @api.model
     def get_pivot_data(self, model_name, domain, context, row_dims, col_dims, measures):

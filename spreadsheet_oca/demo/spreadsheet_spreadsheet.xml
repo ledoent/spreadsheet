@@ -78,6 +78,16 @@
         />
     </record>
 
+    <record id="demo_kpi_dashboard" model="spreadsheet.spreadsheet">
+        <field name="name">KPI Dashboard</field>
+        <field name="owner_id" ref="base.user_admin" />
+        <field
+            name="spreadsheet_binary_data"
+            type="base64"
+            file="spreadsheet_oca/demo/demo_kpi_dashboard.json"
+        />
+    </record>
+
     <record id="demo_pivot_dashboard" model="spreadsheet.spreadsheet">
         <field name="name">Partner Pivot Dashboard</field>
         <field name="owner_id" ref="base.user_admin" />
@@ -98,5 +108,28 @@
         <field name="interval_number">1</field>
         <field name="interval_type">weeks</field>
         <field name="notify_partner_ids" eval="[(4, ref('base.partner_admin'))]" />
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         KPI Alerts
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <record id="demo_alert_revenue" model="spreadsheet.alert">
+        <field name="name">Revenue Below Target</field>
+        <field name="spreadsheet_id" ref="demo_spreadsheet" />
+        <field name="cell_ref">E8</field>
+        <field name="sheet_name">Sales Pipeline</field>
+        <field name="operator" eval="'&lt;'" />
+        <field name="threshold">2000000</field>
+        <field name="trigger_mode">edge</field>
+    </record>
+
+    <record id="demo_alert_cost_lead" model="spreadsheet.alert">
+        <field name="name">Cost Per Lead Warning</field>
+        <field name="spreadsheet_id" ref="demo_kpi_dashboard" />
+        <field name="cell_ref">C2</field>
+        <field name="operator" eval="'&gt;'" />
+        <field name="threshold">45</field>
+        <field name="trigger_mode">level</field>
     </record>
 </odoo>
