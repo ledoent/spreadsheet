@@ -86,6 +86,7 @@
             type="base64"
             file="spreadsheet_oca/demo/demo_kpi_dashboard.json"
         />
+        <field name="writeback_enabled" eval="True" />
     </record>
 
     <record id="demo_pivot_dashboard" model="spreadsheet.spreadsheet">
@@ -172,5 +173,29 @@
         <field name="partner_id" ref="base.partner_admin" />
         <field name="frequency">weekly</field>
         <field name="include_pivot_data" eval="True" />
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Writeback Logs (audit trail examples)
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <record id="demo_wb_log_1" model="spreadsheet.writeback.log">
+        <field name="spreadsheet_id" ref="demo_kpi_dashboard" />
+        <field name="res_model">res.partner</field>
+        <field name="record_id" eval="ref('demo_partner_de_1')" />
+        <field name="field_name">phone</field>
+        <field name="old_value">+1 555-0101</field>
+        <field name="new_value">+1 555-0199</field>
+        <field name="status">ok</field>
+    </record>
+
+    <record id="demo_wb_log_2" model="spreadsheet.writeback.log">
+        <field name="spreadsheet_id" ref="demo_kpi_dashboard" />
+        <field name="res_model">res.partner</field>
+        <field name="record_id" eval="ref('demo_partner_fr_1')" />
+        <field name="field_name">name</field>
+        <field name="old_value">Dupont SA</field>
+        <field name="new_value">Dupont SA International</field>
+        <field name="status">rolled_back</field>
     </record>
 </odoo>
