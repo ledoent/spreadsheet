@@ -1,7 +1,7 @@
 # Playwright Browser Tests for spreadsheet_oca
 
-End-to-end tests that verify spreadsheet pivots render correctly
-in the browser against a running Odoo instance.
+End-to-end tests that verify spreadsheet pivots render correctly in the browser against
+a running Odoo instance.
 
 ## Setup
 
@@ -35,9 +35,9 @@ pytest -v --screenshot=on  # Screenshots go to /tmp/ss_playwright/
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ODOO_URL` | `http://localhost:8069` | Odoo base URL |
-| `ODOO_DB` | `odoo_prod` | Database name |
-| `ODOO_LOGIN` | `admin` | Login user |
-| `ODOO_PASSWORD` | `admin` | Login password |
+| Variable        | Default                 | Description    |
+| --------------- | ----------------------- | -------------- |
+| `ODOO_URL`      | `http://localhost:8069` | Odoo base URL  |
+| `ODOO_DB`       | `odoo_prod`             | Database name  |
+| `ODOO_LOGIN`    | `admin`                 | Login user     |
+| `ODOO_PASSWORD` | `admin`                 | Login password |

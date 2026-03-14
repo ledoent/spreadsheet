@@ -1,4 +1,5 @@
 """Test demo spreadsheets load and render without errors."""
+
 import pytest
 from conftest import (
     BASE,
@@ -15,6 +16,7 @@ SCREENSHOTS = "/tmp/ss_playwright"
 @pytest.fixture(autouse=True)
 def screenshot_dir():
     import os
+
     os.makedirs(SCREENSHOTS, exist_ok=True)
 
 
@@ -45,12 +47,13 @@ class TestDemoSpreadsheets:
         page.screenshot(path=f"{SCREENSHOTS}/pivot_dashboard.png")
 
         result = check_spreadsheet_errors(page)
-        assert result.get("method") in ("model", "dom_fallback"), (
-            f"Could not inspect: {result}"
-        )
-        assert result["error_count"] == 0, (
-            f"Pivot dashboard has {result['error_count']} errors: {result['errors']}"
-        )
+        assert result.get("method") in (
+            "model",
+            "dom_fallback",
+        ), f"Could not inspect: {result}"
+        assert (
+            result["error_count"] == 0
+        ), f"Pivot dashboard has {result['error_count']} errors: {result['errors']}"
 
     def test_partner_pivot_refresh(self, authenticated_page):
         page = authenticated_page
@@ -59,9 +62,9 @@ class TestDemoSpreadsheets:
         page.screenshot(path=f"{SCREENSHOTS}/pivot_after_refresh.png")
 
         result = check_spreadsheet_errors(page)
-        assert result.get("error_count", 0) == 0, (
-            f"Errors after refresh: {result.get('errors')}"
-        )
+        assert (
+            result.get("error_count", 0) == 0
+        ), f"Errors after refresh: {result.get('errors')}"
 
     def test_sales_pipeline_summary(self, authenticated_page):
         page = authenticated_page
@@ -70,9 +73,9 @@ class TestDemoSpreadsheets:
 
         result = get_all_sheet_errors(page)
         assert result.get("method") in ("model", "dom_fallback")
-        assert result["error_count"] == 0, (
-            f"Pipeline has {result['error_count']} errors: {result['errors']}"
-        )
+        assert (
+            result["error_count"] == 0
+        ), f"Pipeline has {result['error_count']} errors: {result['errors']}"
 
     def test_kpi_dashboard(self, authenticated_page):
         page = authenticated_page
@@ -81,6 +84,6 @@ class TestDemoSpreadsheets:
 
         result = get_all_sheet_errors(page)
         assert result.get("method") in ("model", "dom_fallback")
-        assert result["error_count"] == 0, (
-            f"KPI dashboard has {result['error_count']} errors: {result['errors']}"
-        )
+        assert (
+            result["error_count"] == 0
+        ), f"KPI dashboard has {result['error_count']} errors: {result['errors']}"

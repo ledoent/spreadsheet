@@ -3,10 +3,15 @@
 Verifies that right-clicking a pivot cell shows "See records" and
 navigating opens a filtered list view of the source data.
 """
+
+import logging
+
 import pytest
 from conftest import (
     open_spreadsheet_by_name,
 )
+
+_logger = logging.getLogger(__name__)
 
 SCREENSHOTS = "/tmp/ss_playwright"
 
@@ -77,7 +82,9 @@ class TestDrillThrough:
             )
         else:
             page.keyboard.press("Escape")
-            pytest.skip("'See records' not in context menu — cell may not be a pivot formula")
+            pytest.skip(
+                "'See records' not in context menu — cell may not be a pivot formula"
+            )
 
     def test_see_records_via_model_api(self, authenticated_page):
         """Verify the pivot cell domain can be extracted via the JS model."""
@@ -132,7 +139,7 @@ class TestDrillThrough:
             };
         }"""
         )
-        print(f"\nOWL key debug: {debug_info}")
+        _logger.info("OWL key debug: %s", debug_info)
 
         # Try approach 2: use the cellMenuRegistry directly
         result = page.evaluate(
@@ -164,7 +171,7 @@ class TestDrillThrough:
             }
         }"""
         )
-        print(f"\nRegistry/debug check: {result}")
+        _logger.info("Registry/debug check: %s", result)
 
         # The key assertion: the Odoo CE spreadsheet module registers
         # pivot_see_records in the cellMenuRegistry. If the spreadsheet

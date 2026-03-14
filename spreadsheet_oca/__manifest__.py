@@ -20,6 +20,7 @@
         "views/spreadsheet_scenario_views.xml",
         "views/spreadsheet_subscription_views.xml",
         "views/spreadsheet_writeback_views.xml",
+        "views/spreadsheet_input_param_views.xml",
         "data/mail_templates.xml",
         "data/spreadsheet_spreadsheet_import_mode.xml",
         "data/spreadsheet_alert_cron.xml",

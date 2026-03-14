@@ -4,6 +4,7 @@ Provides shared fixtures for browser, authenticated page, and Odoo helpers.
 Requires: pip install playwright pytest-playwright
 Then: playwright install chromium
 """
+
 import json
 import os
 
@@ -249,7 +250,8 @@ def check_spreadsheet_errors(page: Page):
         } catch(e) {
             return {method: 'exception', error: e.message};
         }
-    }""" % ("", _find_model_js())
+    }"""
+        % ("", _find_model_js())
     )
     return result
 
@@ -299,7 +301,8 @@ def get_all_sheet_errors(page: Page):
         } catch(e) {
             return {method: 'exception', error: e.message};
         }
-    }""" % _find_model_js()
+    }"""
+        % _find_model_js()
     )
     return result
 
@@ -314,8 +317,7 @@ def refresh_all_data(page: Page):
         data_menu.first.click()
         page.wait_for_timeout(1000)
         refresh_item = page.locator(
-            ".o-menu-item:has-text('Refresh'), "
-            ".o-dropdown-item:has-text('Refresh')"
+            ".o-menu-item:has-text('Refresh'), " ".o-dropdown-item:has-text('Refresh')"
         )
         if refresh_item.count() > 0:
             refresh_item.first.click()
@@ -336,7 +338,9 @@ def navigate_to_pivot_view(page: Page, menu_path: str):
     """
     parts = menu_path.split("/")
     for i, part in enumerate(parts):
-        selector = f".o_menu_entry:has-text('{part}'), .o_menu_header:has-text('{part}')"
+        selector = (
+            f".o_menu_entry:has-text('{part}'), .o_menu_header:has-text('{part}')"
+        )
         menu = page.locator(selector).first
         if menu.count() > 0 and menu.is_visible():
             menu.click()
@@ -394,9 +398,15 @@ def insert_pivot_in_spreadsheet(page: Page) -> bool:
     return False
 
 
-def create_spreadsheet_with_pivot(page: Page, model: str, domain: list,
-                                  measures: list, rows: list,
-                                  columns: list = None, name: str = None):
+def create_spreadsheet_with_pivot(
+    page: Page,
+    model: str,
+    domain: list,
+    measures: list,
+    rows: list,
+    columns: list = None,
+    name: str = None,
+):
     """Create a spreadsheet with a pivot via JSON-RPC.
 
     This is faster and more reliable than UI interaction for test setup.
@@ -487,9 +497,7 @@ def create_spreadsheet_with_pivot(page: Page, model: str, domain: list,
 
     import base64
 
-    data_b64 = base64.b64encode(
-        json.dumps(spreadsheet_data).encode()
-    ).decode()
+    data_b64 = base64.b64encode(json.dumps(spreadsheet_data).encode()).decode()
 
     result = rpc_call(
         page,

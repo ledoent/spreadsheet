@@ -6,6 +6,7 @@ verify no errors, then change the measure and verify again.
 
 Requires demo data to be loaded (installed modules with demo).
 """
+
 import pytest
 from conftest import (
     BASE,
@@ -37,9 +38,7 @@ PIVOT_SPECS = [
         "module": "crm",
         "model": "crm.lead",
         "domain": [],
-        "measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "measures": [{"id": "__count", "fieldName": "__count"}],
         "alt_measures": [
             {
                 "id": "expected_revenue:sum",
@@ -62,9 +61,7 @@ PIVOT_SPECS = [
                 "aggregator": "sum",
             }
         ],
-        "alt_measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "alt_measures": [{"id": "__count", "fieldName": "__count"}],
         "rows": [{"fieldName": "partner_id", "order": "desc"}],
         "columns": [],
         "name": "Sales Orders by Partner",
@@ -87,9 +84,7 @@ PIVOT_SPECS = [
         "module": "hr",
         "model": "hr.employee",
         "domain": [],
-        "measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "measures": [{"id": "__count", "fieldName": "__count"}],
         "alt_measures": [],
         "rows": [{"fieldName": "department_id", "order": "asc"}],
         "columns": [{"fieldName": "company_id"}],
@@ -99,9 +94,7 @@ PIVOT_SPECS = [
         "module": "mrp",
         "model": "mrp.production",
         "domain": [],
-        "measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "measures": [{"id": "__count", "fieldName": "__count"}],
         "alt_measures": [
             {"id": "qty_produced:sum", "fieldName": "qty_produced", "aggregator": "sum"}
         ],
@@ -120,9 +113,7 @@ PIVOT_SPECS = [
                 "aggregator": "sum",
             }
         ],
-        "alt_measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "alt_measures": [{"id": "__count", "fieldName": "__count"}],
         "rows": [{"fieldName": "product_id", "order": "desc"}],
         "columns": [],
         "name": "Stock Moves by Product",
@@ -138,9 +129,7 @@ PIVOT_SPECS = [
                 "aggregator": "sum",
             }
         ],
-        "alt_measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "alt_measures": [{"id": "__count", "fieldName": "__count"}],
         "rows": [{"fieldName": "partner_id", "order": "desc"}],
         "columns": [],
         "name": "Purchase Orders by Vendor",
@@ -149,9 +138,7 @@ PIVOT_SPECS = [
         "module": "base",
         "model": "res.partner",
         "domain": [["active", "=", True]],
-        "measures": [
-            {"id": "__count", "fieldName": "__count"}
-        ],
+        "measures": [{"id": "__count", "fieldName": "__count"}],
         "alt_measures": [],
         "rows": [{"fieldName": "country_id", "order": "desc"}],
         "columns": [{"fieldName": "is_company"}],
@@ -204,9 +191,7 @@ class TestModulePivots:
         # Cleanup
         _cleanup_test_spreadsheets(page)
 
-    @pytest.mark.parametrize(
-        "spec", PIVOT_SPECS, ids=[s["name"] for s in PIVOT_SPECS]
-    )
+    @pytest.mark.parametrize("spec", PIVOT_SPECS, ids=[s["name"] for s in PIVOT_SPECS])
     def test_pivot_renders_without_errors(self, authenticated_page, spec):
         page = authenticated_page
         if not is_module_installed(page, spec["module"]):
@@ -220,16 +205,15 @@ class TestModulePivots:
         page.screenshot(path=f"{SCREENSHOTS}/pivot_{slug}.png")
 
         result = check_spreadsheet_errors(page)
-        assert result.get("method") in ("model", "dom_fallback"), (
-            f"Cannot inspect: {result}"
-        )
-        assert result["error_count"] == 0, (
-            f"{spec['name']}: {result['error_count']} errors: {result['errors']}"
-        )
+        assert result.get("method") in (
+            "model",
+            "dom_fallback",
+        ), f"Cannot inspect: {result}"
+        assert (
+            result["error_count"] == 0
+        ), f"{spec['name']}: {result['error_count']} errors: {result['errors']}"
 
-    @pytest.mark.parametrize(
-        "spec", PIVOT_SPECS, ids=[s["name"] for s in PIVOT_SPECS]
-    )
+    @pytest.mark.parametrize("spec", PIVOT_SPECS, ids=[s["name"] for s in PIVOT_SPECS])
     def test_pivot_survives_refresh(self, authenticated_page, spec):
         page = authenticated_page
         if not is_module_installed(page, spec["module"]):
@@ -239,9 +223,9 @@ class TestModulePivots:
         refresh_all_data(page)
 
         result = check_spreadsheet_errors(page)
-        assert result.get("error_count", 0) == 0, (
-            f"{spec['name']} errors after refresh: {result.get('errors')}"
-        )
+        assert (
+            result.get("error_count", 0) == 0
+        ), f"{spec['name']} errors after refresh: {result.get('errors')}"
 
 
 class TestPivotMeasureChange:
@@ -341,9 +325,9 @@ class TestPivotMeasureChange:
         page.screenshot(path=f"{SCREENSHOTS}/pivot_{slug}_alt_measure.png")
 
         errors = check_spreadsheet_errors(page)
-        assert errors.get("error_count", -1) == 0, (
-            f"Errors after measure change to {alt['id']}: {errors.get('errors')}"
-        )
+        assert (
+            errors.get("error_count", -1) == 0
+        ), f"Errors after measure change to {alt['id']}: {errors.get('errors')}"
 
 
 class TestPivotFromUI:
@@ -386,9 +370,7 @@ class TestPivotFromUI:
         page.wait_for_timeout(2000)
 
         # Confirm dialog
-        confirm = page.locator(
-            ".modal-footer button.btn-primary"
-        )
+        confirm = page.locator(".modal-footer button.btn-primary")
         if confirm.count() > 0 and confirm.first.is_visible():
             confirm.first.click()
             page.wait_for_timeout(PIVOT_WAIT)
@@ -402,6 +384,6 @@ class TestPivotFromUI:
 
         result = check_spreadsheet_errors(page)
         assert result.get("method") in ("model", "dom_fallback")
-        assert result["error_count"] == 0, (
-            f"Errors in inserted pivot: {result['errors']}"
-        )
+        assert (
+            result["error_count"] == 0
+        ), f"Errors in inserted pivot: {result['errors']}"
