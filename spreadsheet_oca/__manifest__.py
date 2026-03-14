@@ -17,6 +17,7 @@
         "views/spreadsheet_refresh_schedule_views.xml",
         "views/spreadsheet_alert_views.xml",
         "views/spreadsheet_xlsx_export_views.xml",
+        "views/spreadsheet_scenario_views.xml",
         "data/mail_templates.xml",
         "data/spreadsheet_spreadsheet_import_mode.xml",
         "data/spreadsheet_alert_cron.xml",
