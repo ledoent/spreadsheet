@@ -9,3 +9,4 @@ from . import pivot_data
 from . import spreadsheet_refresh_schedule
 from . import spreadsheet_alert
 from . import spreadsheet_scenario
+from . import spreadsheet_subscription

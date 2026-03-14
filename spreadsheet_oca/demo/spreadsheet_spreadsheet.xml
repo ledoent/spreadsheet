@@ -162,4 +162,15 @@
             name="cell_overrides"
         >{"Sales Pipeline!B2": 84000, "Sales Pipeline!C2": 98000, "Sales Pipeline!D2": 112000, "Sales Pipeline!B3": 56000, "Sales Pipeline!C3": 63000, "Sales Pipeline!D3": 70000, "Sales Pipeline!B4": 35000, "Sales Pipeline!C4": 42000, "Sales Pipeline!D4": 49000, "Sales Pipeline!B5": 21000, "Sales Pipeline!C5": 24500, "Sales Pipeline!D5": 28000, "Sales Pipeline!B6": 14000, "Sales Pipeline!C6": 17500, "Sales Pipeline!D6": 21000}</field>
     </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Subscriptions
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <record id="demo_sub_weekly" model="spreadsheet.subscription">
+        <field name="spreadsheet_id" ref="demo_spreadsheet" />
+        <field name="partner_id" ref="base.partner_admin" />
+        <field name="frequency">weekly</field>
+        <field name="include_pivot_data" eval="True" />
+    </record>
 </odoo>

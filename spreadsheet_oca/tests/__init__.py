@@ -3,3 +3,4 @@ from . import test_refresh_schedule
 from . import test_alert
 from . import test_xlsx_export
 from . import test_scenario
+from . import test_subscription
