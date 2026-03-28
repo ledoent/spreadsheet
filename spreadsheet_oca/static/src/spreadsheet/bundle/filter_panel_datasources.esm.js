@@ -147,7 +147,7 @@ PivotPanelDisplay.components = {
     PivotTitleSectionInsertion,
     PivotLayoutConfiguratorWithAggregators,
 };
-PivotPanelDisplay.properties = {
+PivotPanelDisplay.props = {
     pivotId: String,
 };
 
