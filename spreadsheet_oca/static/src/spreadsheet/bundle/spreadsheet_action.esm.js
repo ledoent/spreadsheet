@@ -66,7 +66,7 @@ export class ActionSpreadsheetOca extends Component {
             return;
         }
         if (this.spreadsheetId) {
-            this.orm.call(this.model, "write", [this.spreadsheetId, data]);
+            await this.orm.call(this.model, "write", [this.spreadsheetId, data]);
         } else {
             this.spreadsheetId = await this.orm.call(this.model, "create", [data]);
         }
@@ -82,7 +82,7 @@ export class ActionSpreadsheetOca extends Component {
     cleanSearchParams() {
         const searchParams = this.import_data.searchParams;
         const context = {};
-        for (var key of Object.keys(searchParams.context)) {
+        for (const key of Object.keys(searchParams.context)) {
             if (key.startsWith("pivot_") || key.startsWith("graph_")) {
                 continue;
             }
@@ -91,7 +91,7 @@ export class ActionSpreadsheetOca extends Component {
         return {...searchParams, context};
     }
     async importDataGraph(spreadsheet_model) {
-        var sheetId = spreadsheet_model.getters.getActiveSheetId();
+        let sheetId = spreadsheet_model.getters.getActiveSheetId();
         if (this.import_data.new === undefined && this.import_data.new_sheet) {
             sheetId = uuidGenerator.uuidv4();
             spreadsheet_model.dispatch("CREATE_SHEET", {
@@ -136,7 +136,7 @@ export class ActionSpreadsheetOca extends Component {
         });
     }
     importCreateOrReuseSheet(spreadsheet_model) {
-        var sheetId = spreadsheet_model.getters.getActiveSheetId();
+        let sheetId = spreadsheet_model.getters.getActiveSheetId();
         if (this.import_data.new === undefined) {
             sheetId = uuidGenerator.uuidv4();
             spreadsheet_model.dispatch("CREATE_SHEET", {
@@ -153,7 +153,7 @@ export class ActionSpreadsheetOca extends Component {
         return sheetId;
     }
     async importDataList(spreadsheet_model) {
-        var sheetId = this.importCreateOrReuseSheet(spreadsheet_model);
+        let sheetId = this.importCreateOrReuseSheet(spreadsheet_model);
         if (!sheetId) {
             const sheetIds = spreadsheet_model.getters.getSheetIds();
             sheetId = sheetIds.length ? sheetIds[0] : uuidGenerator.uuidv4();
@@ -194,7 +194,7 @@ export class ActionSpreadsheetOca extends Component {
         });
     }
     async importDataPivot(spreadsheet_model) {
-        var sheetId = this.importCreateOrReuseSheet(spreadsheet_model);
+        const sheetId = this.importCreateOrReuseSheet(spreadsheet_model);
         const pivotId = uuidGenerator.uuidv4();
         const fields = this.import_data.metaData.fields || {};
         const activeMeasures = this.import_data.metaData.activeMeasures;
