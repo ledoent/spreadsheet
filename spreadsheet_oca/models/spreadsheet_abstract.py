@@ -177,3 +177,7 @@ class SpreadsheetAbstract(models.AbstractModel):
         if "spreadsheet_raw" in vals:
             self.spreadsheet_revision_ids.unlink()
         return super().write(vals)
+
+    def unlink(self):
+        self.spreadsheet_revision_ids.unlink()
+        return super().unlink()
