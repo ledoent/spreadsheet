@@ -27,7 +27,7 @@
         t-inherit="web.ListView.Buttons"
         t-inherit-mode="primary"
     >
-        <xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
+        <xpath expr="." position="inside">
             <SpreadsheetFileUploader>
                 <t t-set-slot="toggler">
                     <button
