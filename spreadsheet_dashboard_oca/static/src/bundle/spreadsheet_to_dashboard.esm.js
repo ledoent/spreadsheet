@@ -34,7 +34,7 @@ patch(SpreadsheetRenderer.prototype, {
         const record = this.props.record;
         const resId = this.props.res_id;
         const name = record.name;
-        this.onSpreadsheetSaved();
+        await this.onSpreadsheetSaved();
         this.env.services.action.doAction(
             {
                 name: _t("Add to dashboard"),
