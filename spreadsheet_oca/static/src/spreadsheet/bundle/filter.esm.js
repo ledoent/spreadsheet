@@ -1,5 +1,5 @@
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import {Component, onWillStart, useState} from "@odoo/owl";
+import {Component, onWillStart, proxy, useProps} from "@odoo/owl";
 import {DefaultDateValue} from "@spreadsheet/global_filters/components/default_date_value/default_date_value";
 import {Domain} from "@web/core/domain";
 import {DomainSelector} from "@web/core/domain_selector/domain_selector";
@@ -15,7 +15,7 @@ import {user} from "@web/core/user";
 const {Checkbox} = spreadsheet.components;
 
 const {topbarMenuRegistry} = spreadsheet.registries;
-const uuidGenerator = new spreadsheet.helpers.UuidGenerator();
+const uuidGenerator = spreadsheet.helpers.UuidGenerator;
 
 topbarMenuRegistry.addChild("filters", ["file"], {
     name: _t("Filters"),
@@ -39,6 +39,8 @@ topbarMenuRegistry.addChild("download", ["file"], {
 const {sidePanelRegistry} = spreadsheet.registries;
 
 export class FilterPanel extends Component {
+    props = useProps();
+
     onEditFilter(filter) {
         this.env.openSidePanel("EditFilterPanel", {filter});
     }
@@ -67,12 +69,14 @@ sidePanelRegistry.add("FilterPanel", {
 });
 
 export class EditFilterPanel extends Component {
+    props = useProps();
+
     setup() {
         this.filterId = this.props.filter.id;
         this.orm = useService("orm");
         this.nameService = useService("name");
         this.dialog = useService("dialog");
-        this.state = useState({
+        this.state = proxy({
             label: this.props.filter.label,
             type: this.props.filter.type,
             defaultValue: this._unwrapDefaultValue(

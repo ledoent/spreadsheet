@@ -3,16 +3,15 @@
 
 {
     "name": "Spreadsheet Oca",
-    "summary": """
-        Allow to edit spreadsheets""",
-    "version": "19.0.1.0.1",
+    "summary": "Allow to edit spreadsheets",
+    "version": "20.0.1.0.0",
     "license": "AGPL-3",
     "author": "CreuBlanca,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/spreadsheet",
     "depends": ["spreadsheet", "base_sparse_field", "bus"],
     "data": [
         "security/security.xml",
-        "security/ir.model.access.csv",
+        "security/ir.access.csv",
         "views/spreadsheet_spreadsheet.xml",
         "data/spreadsheet_spreadsheet_import_mode.xml",
         "wizards/spreadsheet_select_row_number.xml",

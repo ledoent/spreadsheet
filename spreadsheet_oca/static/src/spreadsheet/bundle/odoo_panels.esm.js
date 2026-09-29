@@ -17,9 +17,11 @@ const {
     TreeMapChartDesignPanel,
     WaterfallChartDesignPanel,
 } = spreadsheet.components;
-const {Component} = owl;
+const {Component, useProps} = owl;
 
 export class OdooPanel extends Component {
+    props = useProps();
+
     setup() {
         this.menus = useService("menu");
     }

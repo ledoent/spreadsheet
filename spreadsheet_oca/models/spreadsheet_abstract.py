@@ -1,12 +1,12 @@
 # Copyright 2022 CreuBlanca
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-import base64
 import json
 from typing import Any
 
 from odoo import api, fields, models
 from odoo.exceptions import AccessError
+from odoo.tools import BinaryBytes
 
 CollaborationMessage = dict[str, Any]
 
@@ -20,7 +20,7 @@ class SpreadsheetAbstract(models.AbstractModel):
     active = fields.Boolean(default=True)
     spreadsheet_binary_data = fields.Binary(
         string="Spreadsheet file",
-        default=lambda self: self._empty_spreadsheet_data_base64(),
+        default=lambda self: self._empty_spreadsheet_data_bytes(),
     )
     spreadsheet_raw = fields.Serialized(
         inverse="_inverse_spreadsheet_raw", compute="_compute_spreadsheet_raw"
@@ -36,25 +36,20 @@ class SpreadsheetAbstract(models.AbstractModel):
         for dashboard in self:
             if dashboard.spreadsheet_binary_data:
                 dashboard.spreadsheet_raw = json.loads(
-                    base64.decodebytes(dashboard.spreadsheet_binary_data).decode(
-                        "UTF-8"
-                    )
+                    dashboard.spreadsheet_binary_data.decode("UTF-8")
                 )
             else:
                 dashboard.spreadsheet_raw = {}
 
     def _inverse_spreadsheet_raw(self):
         for record in self:
-            record.spreadsheet_binary_data = base64.encodebytes(
+            record.spreadsheet_binary_data = BinaryBytes(
                 json.dumps(record.spreadsheet_raw).encode("UTF-8")
             )
 
-    def _empty_spreadsheet_data_base64(self):
-        """Create an empty spreadsheet workbook.
-        Encoded as base64
-        """
-        data = json.dumps(self._empty_spreadsheet_data())
-        return base64.b64encode(data.encode())
+    def _empty_spreadsheet_data_bytes(self):
+        """Create an empty spreadsheet workbook, as the field's raw content."""
+        return BinaryBytes(json.dumps(self._empty_spreadsheet_data()).encode())
 
     def _empty_spreadsheet_data(self):
         """Create an empty spreadsheet workbook.

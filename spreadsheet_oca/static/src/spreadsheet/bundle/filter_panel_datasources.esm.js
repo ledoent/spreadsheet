@@ -1,5 +1,13 @@
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import {Component, onWillStart, onWillUpdateProps, useRef, useState} from "@odoo/owl";
+import {
+    Component,
+    onWillStart,
+    onWillUpdateProps,
+    proxy,
+    signal,
+    t,
+    useProps,
+} from "@odoo/owl";
 import {Domain} from "@web/core/domain";
 import {DomainSelector} from "@web/core/domain_selector/domain_selector";
 import {DomainSelectorDialog} from "@web/core/domain_selector_dialog/domain_selector_dialog";
@@ -84,10 +92,13 @@ export class PivotTitleSectionInsertion extends PivotTitleSection {
 }
 
 export class PivotPanelDisplay extends Component {
+    props = useProps({pivotId: t.string()});
+
+    pivotPanelRef = signal.ref();
+
     setup() {
         this.dialog = useService("dialog");
         this.store = useLocalStore(PivotSidePanelStore, this.props.pivotId);
-        this.pivotPanelRef = useRef("pivotPanel");
         onWillStart(this.modelData.bind(this));
         onWillUpdateProps(this.modelData.bind(this));
     }
@@ -131,7 +142,7 @@ export class PivotPanelDisplay extends Component {
         this.store.update({domain});
     }
     getScrollableContainerEl() {
-        return this.pivotPanelRef.el;
+        return this.pivotPanelRef();
     }
     flipAxis() {
         const dimensions = {
@@ -153,6 +164,8 @@ PivotPanelDisplay.properties = {
 };
 
 export class PivotPanel extends Component {
+    props = useProps();
+
     get pivotId() {
         return this.props.pivotId;
     }
@@ -171,8 +184,13 @@ pivotSidePanelRegistry.add("ODOO", {
 });
 
 export class ListPanelDisplay extends Component {
+    props = useProps({
+        listId: t.string(),
+        listDefinition: t.object(),
+    });
+
     setup() {
-        this.state = useState({listRows: undefined});
+        this.state = proxy({listRows: undefined});
         this.dialog = useService("dialog");
         onWillStart(this.modelData.bind(this));
         onWillUpdateProps(this.modelData.bind(this));
@@ -245,12 +263,10 @@ ListPanelDisplay.template = "spreadsheet_oca.ListPanelDisplay";
 ListPanelDisplay.components = {
     DomainSelector,
 };
-ListPanelDisplay.props = {
-    listId: String,
-    listDefinition: Object,
-};
 
 export class ListPanel extends Component {
+    props = useProps();
+
     get listId() {
         return this.props.listId;
     }
