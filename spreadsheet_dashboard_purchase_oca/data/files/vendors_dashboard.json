@@ -872,6 +872,7 @@
       ],
       "isVisible": true,
       "areGridLinesVisible": true,
+      "backgroundColor": "#F9FAFB",
       "headerGroups": [],
       "comments": []
     },
