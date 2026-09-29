@@ -10,7 +10,7 @@ from odoo import api, fields, models
 
 class SpreadsheetSpreadsheet(models.Model):
     _name = "spreadsheet.spreadsheet"
-    _inherit = ["spreadsheet.abstract", "mail.thread", "mail.activity.mixin"]
+    _inherit = ["spreadsheet.abstract", "mail.thread", "mail.activity.mixin"]  # noqa: RUF012
     _description = "Spreadsheet"
 
     filename = fields.Char(compute="_compute_filename")
@@ -71,9 +71,7 @@ class SpreadsheetSpreadsheet(models.Model):
             ) as xlsx:
                 # List and filter for XML and REL files
                 xml_files = [
-                    f
-                    for f in xlsx.namelist()
-                    if f.endswith(".xml") or f.endswith(".rels")
+                    f for f in xlsx.namelist() if f.endswith((".xml", ".rels"))
                 ]
                 # Extract each file
                 for xml_file in xml_files:

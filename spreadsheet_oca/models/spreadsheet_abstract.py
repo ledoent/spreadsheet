@@ -14,7 +14,7 @@ CollaborationMessage = dict[str, Any]
 class SpreadsheetAbstract(models.AbstractModel):
     _name = "spreadsheet.abstract"
     _description = "Spreadsheet abstract for inheritance"
-    _inherit = ["bus.listener.mixin"]
+    _inherit = "bus.listener.mixin"
 
     name = fields.Char(required=True)
     active = fields.Boolean(default=True)
@@ -158,10 +158,7 @@ class SpreadsheetAbstract(models.AbstractModel):
         return False
 
     def _check_access_spreadsheet(self, operation: str):
-        try:
-            self.check_access(operation)
-        except AccessError as e:
-            raise e
+        self.check_access(operation)
         return True
 
     @api.model
