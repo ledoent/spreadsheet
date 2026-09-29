@@ -1,7 +1,6 @@
 # Copyright 2022 CreuBlanca
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-import base64
 import zipfile
 from io import BytesIO
 
@@ -66,9 +65,7 @@ class SpreadsheetSpreadsheet(models.Model):
         spreadsheets = self.env["spreadsheet.spreadsheet"]
         for attachment in attachments:
             extracted = {}
-            with zipfile.ZipFile(
-                BytesIO(base64.b64decode(attachment.datas)), "r"
-            ) as xlsx:
+            with zipfile.ZipFile(BytesIO(attachment.raw), "r") as xlsx:
                 # List and filter for XML and REL files
                 xml_files = [
                     f for f in xlsx.namelist() if f.endswith((".xml", ".rels"))

@@ -1,12 +1,17 @@
-import {Component} from "@odoo/owl";
+import {ActionPlugin} from "@web/webclient/actions/action_plugin";
 import {ControlPanel} from "@web/search/control_panel/control_panel";
-import {useService} from "@web/core/utils/hooks";
 
-const {useState} = owl;
+const {Component, proxy, t, useProps, usePlugin} = owl;
 
 export class SpreadsheetName extends Component {
+    props = useProps({
+        name: t.string(),
+        isReadonly: t.boolean(),
+        onChanged: t.function().optional(),
+    });
+
     setup() {
-        this.state = useState({
+        this.state = proxy({
             name: this.props.name,
         });
     }
@@ -24,16 +29,16 @@ export class SpreadsheetName extends Component {
     }
 }
 SpreadsheetName.template = "spreadsheet_oca.SpreadsheetName";
-SpreadsheetName.props = {
-    name: String,
-    isReadonly: Boolean,
-    onChanged: {type: Function, optional: true},
-};
 
 export class SpreadsheetControlPanel extends ControlPanel {
+    props = useProps({
+        display: t.object().optional(),
+        record: t.object(),
+    });
+
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     onBreadcrumbClicked(jsId) {
@@ -41,10 +46,6 @@ export class SpreadsheetControlPanel extends ControlPanel {
     }
 }
 SpreadsheetControlPanel.template = "spreadsheet_oca.SpreadsheetControlPanel";
-SpreadsheetControlPanel.props = {
-    ...ControlPanel.props,
-    record: Object,
-};
 SpreadsheetControlPanel.components = {
     ...ControlPanel.components,
     SpreadsheetName,

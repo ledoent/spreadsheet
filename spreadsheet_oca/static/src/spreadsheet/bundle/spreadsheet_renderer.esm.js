@@ -1,21 +1,24 @@
 import * as spreadsheet from "@odoo/o-spreadsheet";
 
-import {Component} from "@odoo/owl";
+import {ActionPlugin} from "@web/webclient/actions/action_plugin";
 import {ImageFileStore} from "./image_file_store.esm";
+import {NotificationPlugin} from "@web/core/notifications/notification_plugin";
 import {OdooDataProvider} from "@spreadsheet/data_sources/odoo_data_provider";
 import {SpreadsheetComponent} from "@spreadsheet/actions/spreadsheet_component";
+import {UIPlugin} from "@web/core/ui/ui_plugin";
 import {_t} from "@web/core/l10n/translation";
 import {loadBundle} from "@web/core/assets";
 import {useService} from "@web/core/utils/hooks";
 import {useSetupAction} from "@web/search/action_hook";
+import {useSubEnv} from "@web/owl2/utils";
 import {user} from "@web/core/user";
 import {waitForDataLoaded} from "@spreadsheet/helpers/model";
 
 const {Model, load} = spreadsheet;
 
-const {useSubEnv, onWillStart} = owl;
+const {Component, onWillStart, t, useProps, usePlugin} = owl;
 const {useStoreProvider, ModelStore} = spreadsheet.stores;
-const uuidGenerator = new spreadsheet.helpers.UuidGenerator();
+const uuidGenerator = spreadsheet.helpers.UuidGenerator;
 
 class SpreadsheetTransportService {
     constructor(orm, bus_service, model, res_id) {
@@ -78,6 +81,13 @@ class SpreadsheetTransportService {
 }
 
 export class SpreadsheetRenderer extends Component {
+    props = useProps({
+        record: t.object(),
+        res_id: t.number(),
+        model: t.string(),
+        importData: t.function(),
+    });
+
     createDefaultCurrency(currency) {
         if (!currency) {
             return undefined;
@@ -121,10 +131,10 @@ export class SpreadsheetRenderer extends Component {
         this.orm = useService("orm");
         this.http = useService("http");
         this.bus_service = this.env.services.bus_service;
-        this.ui = useService("ui");
-        this.action = useService("action");
+        this.ui = usePlugin(UIPlugin);
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
-        this.notifications = useService("notification");
+        this.notifications = usePlugin(NotificationPlugin);
         const odooDataProvider = new OdooDataProvider(this.env);
         this.loadCurrencies = this.getCurrencies();
         this.loadLocales = this.getLocales();
@@ -204,9 +214,3 @@ export class SpreadsheetRenderer extends Component {
 
 SpreadsheetRenderer.template = "spreadsheet_oca.SpreadsheetRenderer";
 SpreadsheetRenderer.components = {SpreadsheetComponent};
-SpreadsheetRenderer.props = {
-    record: Object,
-    res_id: Number,
-    model: String,
-    importData: Function,
-};

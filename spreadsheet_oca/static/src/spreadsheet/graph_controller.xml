@@ -5,10 +5,11 @@
         t-inherit="web.GraphView.Buttons"
         t-inherit-mode="extension"
     >
-        <xpath expr="//button[hasclass('fa-pie-chart')]" position="after">
+        <xpath expr="//button[@data-mode='pie']" position="after">
             <button
-                class="btn btn-secondary fa fa-table"
-                t-on-click="onSpreadsheetButtonClicked"
+                class="btn btn-secondary oi"
+                data-icon="table"
+                t-on-click="this.onSpreadsheetButtonClicked"
                 data-tooltip="Add to spreadsheet"
                 aria-label="Add to spreadsheet"
                 t-attf-disabled="{{noDataDisplayed ? 'disabled' : false}}"

@@ -1,19 +1,21 @@
 import * as spreadsheet from "@odoo/o-spreadsheet";
 
 import {Domain} from "@web/core/domain";
+import {NotificationPlugin} from "@web/core/notifications/notification_plugin";
 import {SpreadsheetControlPanel} from "./spreadsheet_controlpanel.esm";
 import {SpreadsheetRenderer} from "./spreadsheet_renderer.esm";
 import {deepCopy} from "@web/core/utils/objects";
 import {helpers} from "@odoo/o-spreadsheet";
 import {registry} from "@web/core/registry";
-import {standardActionServiceProps} from "@web/webclient/actions/action_service";
+import {standardActionServiceProps} from "@web/webclient/actions/action_plugin";
 import {useService} from "@web/core/utils/hooks";
+import {useSubEnv} from "@web/owl2/utils";
 
 const {load} = spreadsheet;
 
-const uuidGenerator = new spreadsheet.helpers.UuidGenerator();
+const uuidGenerator = spreadsheet.helpers.UuidGenerator;
 const actionRegistry = registry.category("actions");
-const {Component, onWillStart, useSubEnv} = owl;
+const {Component, onWillStart, usePlugin, useProps} = owl;
 const {parseDimension, isDateOrDatetimeField} = helpers;
 
 function normalizeGroupBys(dimensions, fields) {
@@ -29,9 +31,11 @@ function normalizeGroupBys(dimensions, fields) {
 }
 
 export class ActionSpreadsheetOca extends Component {
+    props = useProps({...standardActionServiceProps});
+
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         const params = this.props.action.params || this.props.action.context.params;
         this.spreadsheetId = params.spreadsheet_id || params.active_id;
         this.model = params.model || "spreadsheet.spreadsheet";
@@ -158,34 +162,24 @@ export class ActionSpreadsheetOca extends Component {
             sheetId = sheetIds.length ? sheetIds[0] : uuidGenerator.uuidv4();
         }
         const listId = spreadsheet_model.getters.getNextListId();
-        const list_info = {
-            metaData: {
-                resModel: this.import_data.metaData.model,
-                columns: this.import_data.metaData.columns.map((column) => column.name),
-                fields: this.import_data.metaData.fields,
-            },
-            searchParams: {
-                domain: new Domain(this.import_data.metaData.domain).toJson(),
-                context: this.import_data.metaData.context,
-                orderBy: this.import_data.metaData.orderBy,
-            },
+        const columns = this.import_data.metaData.columns;
+        const definition = {
+            model: this.import_data.metaData.model,
+            columns,
+            domain: new Domain(this.import_data.metaData.domain).toJson(),
+            context: this.import_data.metaData.context,
+            orderBy: this.import_data.metaData.orderBy,
             name: this.import_data.name,
             actionXmlId: this.import_data.actionXmlId,
         };
-        const columns = this.import_data.metaData.columns.map((c) => ({
-            name: c.name,
-            type: this.import_data.metaData.fields[c.name].type,
-        }));
-        const definitionWithoutFields = JSON.parse(JSON.stringify(list_info));
-        definitionWithoutFields.metaData.fields = undefined;
         spreadsheet_model.dispatch("INSERT_ODOO_LIST_WITH_TABLE", {
             sheetId,
             col: 0,
             row: 0,
-            id: listId,
-            definition: definitionWithoutFields,
+            listId,
+            definition,
             linesNumber: this.import_data.dyn_number_of_rows,
-            columns: columns,
+            mode: "dynamic",
         });
         const dataSource = spreadsheet_model.getters.getListDataSource(listId);
         await dataSource.load();
@@ -270,7 +264,6 @@ ActionSpreadsheetOca.components = {
     SpreadsheetRenderer,
     SpreadsheetControlPanel,
 };
-ActionSpreadsheetOca.props = {...standardActionServiceProps};
 actionRegistry.add("action_spreadsheet_oca", ActionSpreadsheetOca, {
     force: true,
 });
