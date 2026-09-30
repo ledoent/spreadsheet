@@ -1,10 +1,11 @@
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import {useState, useSubEnv} from "@odoo/owl";
+import {proxy} from "@odoo/owl";
 import {SpreadsheetRenderer} from "@spreadsheet_oca/spreadsheet/bundle/spreadsheet_renderer.esm";
 import {_t} from "@web/core/l10n/translation";
 import {patch} from "@web/core/utils/patch";
 const {topbarMenuRegistry} = spreadsheet.registries;
 import {user} from "@web/core/user";
+import {useSubEnv} from "@web/owl2/utils";
 
 topbarMenuRegistry.addChild("add_to_dashboard", ["file"], {
     name: _t("Add to dashboard"),
@@ -17,7 +18,7 @@ topbarMenuRegistry.addChild("add_to_dashboard", ["file"], {
 patch(SpreadsheetRenderer.prototype, {
     setup() {
         super.setup();
-        this.state = useState({canAddToDashboard: false});
+        this.state = proxy({canAddToDashboard: false});
         this._checkDashboardPermission();
         useSubEnv({
             addToDashboard: this._addToDashboard.bind(this),
