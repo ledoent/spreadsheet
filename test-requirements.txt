@@ -1,0 +1,2 @@
+# DO NOT MERGE — temporary pin until spreadsheet_oca's 20.0 port lands upstream.
+odoo-addon-spreadsheet_oca @ git+https://github.com/ledoent/spreadsheet.git@20.0-mig-spreadsheet_oca#subdirectory=spreadsheet_oca
