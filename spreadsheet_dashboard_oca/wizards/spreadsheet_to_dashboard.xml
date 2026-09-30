@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <record id="spreadsheet_to_dashboard_view_form" model="ir.ui.view">
         <field name="name">spreadsheet.to.dashboard.view.form</field>
