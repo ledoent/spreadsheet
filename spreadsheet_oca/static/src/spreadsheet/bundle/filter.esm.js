@@ -105,12 +105,12 @@ export class EditFilterPanel extends Component {
                 this.state.modelData.hasParentRelation = hasParentRelation;
             }
         }
-        var ModelFields = [];
-        for (var [objectType, objectClass] of Object.entries(
+        const ModelFields = [];
+        for (const [objectType, objectClass] of Object.entries(
             globalFiltersFieldMatchers
         )) {
             for (const objectId of objectClass.getIds()) {
-                var fields = objectClass.getFields(objectId);
+                const fields = objectClass.getFields(objectId);
                 this.state.objects[objectType + "_" + objectId] = {
                     id: objectType + "_" + objectId,
                     objectId: objectId,

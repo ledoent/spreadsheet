@@ -36,7 +36,7 @@ patch(PivotRenderer.prototype, {
         );
     },
     getSpreadsheetInsertionTooltip() {
-        var message = _t("Add to spreadsheet");
+        let message = _t("Add to spreadsheet");
         if (this.containsDuplicatedGroupBys()) {
             message = _t("Duplicated groupbys in pivot are not supported");
         } else if (this.isComparingInfo()) {

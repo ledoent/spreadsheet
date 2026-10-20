@@ -10,6 +10,7 @@ import {useService} from "@web/core/utils/hooks";
 class SpreadsheetFileUploader extends Component {
     setup() {
         this.orm = useService("orm");
+        this.notification = useService("notification");
         this.attachmentIdsToProcess = [];
         this.action = useService("action");
     }
