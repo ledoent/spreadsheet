@@ -7,7 +7,6 @@
       "colNumber": 11,
       "rowNumber": 61,
       "cells": {
-        "B7": "[Top Vendors by Amount](odoo://view/{\"viewType\":\"graph\",\"action\":{\"domain\":[],\"context\":{\"group_by\":[\"partner_id\"],\"graph_measure\":\"untaxed_total\",\"graph_mode\":\"bar\",\"graph_groupbys\":[\"partner_id\"]},\"modelName\":\"purchase.report\",\"views\":[[false,\"graph\"],[false,\"pivot\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Top Vendors by Amount\"})",
         "B19": "[Top Orders](odoo://view/{\"viewType\":\"list\",\"action\":{\"domain\":[[\"state\",\"in\",[\"purchase\",\"done\"]]],\"context\":{\"group_by\":[]},\"modelName\":\"purchase.order\",\"views\":[[false,\"list\"],[false,\"kanban\"],[false,\"form\"],[false,\"pivot\"],[false,\"graph\"],[false,\"calendar\"],[false,\"activity\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Top Orders\"})",
         "B20": "=_t(\"Order\")",
         "B21": "=ODOO.LIST(1,1,\"name\")",
@@ -303,7 +302,6 @@
         "K60": "=PIVOT.VALUE(3,\"untaxed_total\",\"#user_id\",10)"
       },
       "styles": {
-        "B7": 1,
         "B19": 1,
         "I19": 1,
         "I32:K33": 1,
@@ -366,50 +364,48 @@
         "D58": 3,
         "D59": 3,
         "D60": 3,
-        "F51": 3,
-        "F52": 3,
-        "F53": 3,
-        "F54": 3,
-        "F55": 3,
-        "F56": 3,
-        "F57": 3,
-        "F58": 3,
-        "F59": 3,
-        "F60": 3,
-        "K21": 3,
-        "K22": 3,
-        "K23": 3,
-        "K24": 3,
-        "K25": 3,
-        "K26": 3,
-        "K27": 3,
-        "K28": 3,
-        "K29": 3,
-        "K30": 3,
-        "K36": 3,
-        "K37": 3,
-        "K38": 3,
-        "K39": 3,
-        "K40": 3,
-        "K41": 3,
-        "K42": 3,
-        "K43": 3,
-        "K44": 3,
-        "K45": 3,
-        "K51": 3,
-        "K52": 3,
-        "K53": 3,
-        "K54": 3,
-        "K55": 3,
-        "K56": 3,
-        "K57": 3,
-        "K58": 3,
-        "K59": 3,
-        "K60": 3
+        "F51": 2,
+        "F52": 2,
+        "F53": 2,
+        "F54": 2,
+        "F55": 2,
+        "F56": 2,
+        "F57": 2,
+        "F58": 2,
+        "F59": 2,
+        "F60": 2,
+        "K21": 2,
+        "K22": 2,
+        "K23": 2,
+        "K24": 2,
+        "K25": 2,
+        "K26": 2,
+        "K27": 2,
+        "K28": 2,
+        "K29": 2,
+        "K30": 2,
+        "K36": 2,
+        "K37": 2,
+        "K38": 2,
+        "K39": 2,
+        "K40": 2,
+        "K41": 2,
+        "K42": 2,
+        "K43": 2,
+        "K44": 2,
+        "K45": 2,
+        "K51": 2,
+        "K52": 2,
+        "K53": 2,
+        "K54": 2,
+        "K55": 2,
+        "K56": 2,
+        "K57": 2,
+        "K58": 2,
+        "K59": 2,
+        "K60": 2
       },
       "borders": {
-        "B7:K7": 1,
-        "B8:K8": 2,
         "B19:G19": 1,
         "I19:K19": 1,
         "B20:G20": 3,
@@ -452,19 +448,19 @@
           "size": 78
         },
         "3": {
-          "size": 130
+          "size": 118
         },
         "4": {
-          "size": 130
+          "size": 118
         },
         "5": {
-          "size": 130
+          "size": 118
         },
         "6": {
-          "size": 78
+          "size": 73
         },
         "7": {
-          "size": 52
+          "size": 46
         },
         "8": {
           "size": 130
@@ -582,12 +578,15 @@
       "figures": [
         {
           "id": "155096a3-ad7f-4e64-bf38-051fcfc90ee0",
-          "width": 1035,
+          "width": 986,
           "height": 230,
           "tag": "chart",
           "data": {
             "title": {
-              "text": ""
+              "text": "Top Vendors by Amount",
+              "fontSize": 21,
+              "bold": true,
+              "color": "#01666B"
             },
             "background": "#FFFFFF",
             "legendPosition": "none",
@@ -625,6 +624,14 @@
               "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
                 "chain": "user_id",
                 "type": "many2one"
+              },
+              "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+                "chain": "product_id",
+                "type": "many2one"
+              },
+              "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+                "chain": "category_id",
+                "type": "many2one"
               }
             },
             "cumulatedStart": false,
@@ -639,7 +646,7 @@
         },
         {
           "id": "53bdb059-e5ce-47d9-bb63-d5f2e665c05f",
-          "width": 200,
+          "width": 190,
           "height": 108,
           "tag": "chart",
           "data": {
@@ -649,11 +656,11 @@
             "title": {
               "text": "Purchased",
               "align": "left",
-              "color": "#434343",
+              "color": "#01666B",
               "bold": true
             },
             "type": "scorecard",
-            "background": "#FFF7ED",
+            "background": "#FFFFFF",
             "baseline": "Data!E2",
             "baselineDescr": {
               "text": "since last period"
@@ -670,7 +677,7 @@
         },
         {
           "id": "1e548a1e-ef9f-47f8-a9c7-b42709559c74",
-          "width": 200,
+          "width": 190,
           "height": 108,
           "tag": "chart",
           "data": {
@@ -680,11 +687,11 @@
             "title": {
               "text": "Orders",
               "align": "left",
-              "color": "#434343",
+              "color": "#01666B",
               "bold": true
             },
             "type": "scorecard",
-            "background": "#EFF6FF",
+            "background": "#FFFFFF",
             "baseline": "Data!E4",
             "baselineDescr": {
               "text": "since last period"
@@ -693,7 +700,7 @@
             "chartId": "1e548a1e-ef9f-47f8-a9c7-b42709559c74"
           },
           "offset": {
-            "x": 209,
+            "x": 199,
             "y": 9
           },
           "col": 1,
@@ -701,7 +708,7 @@
         },
         {
           "id": "d161aa79-1991-4d86-9b51-df4e66f9ae7e",
-          "width": 200,
+          "width": 190,
           "height": 108,
           "tag": "chart",
           "data": {
@@ -711,11 +718,11 @@
             "title": {
               "text": "Lines",
               "align": "left",
-              "color": "#434343",
+              "color": "#01666B",
               "bold": true
             },
             "type": "scorecard",
-            "background": "#EFF6FF",
+            "background": "#FFFFFF",
             "baseline": "Data!E3",
             "baselineDescr": {
               "text": "since last period"
@@ -724,7 +731,7 @@
             "chartId": "d161aa79-1991-4d86-9b51-df4e66f9ae7e"
           },
           "offset": {
-            "x": 418,
+            "x": 398,
             "y": 9
           },
           "col": 1,
@@ -732,7 +739,7 @@
         },
         {
           "id": "3b318ab5-0677-4790-8446-d37a0b4c6ac6",
-          "width": 200,
+          "width": 190,
           "height": 108,
           "tag": "chart",
           "data": {
@@ -742,11 +749,11 @@
             "title": {
               "text": "Days to receive",
               "align": "left",
-              "color": "#434343",
+              "color": "#01666B",
               "bold": true
             },
             "type": "scorecard",
-            "background": "#EFF6FF",
+            "background": "#FFFFFF",
             "baseline": "Data!E6",
             "baselineDescr": {
               "text": "last period"
@@ -755,7 +762,7 @@
             "chartId": "3b318ab5-0677-4790-8446-d37a0b4c6ac6"
           },
           "offset": {
-            "x": 836,
+            "x": 796,
             "y": 9
           },
           "col": 1,
@@ -763,7 +770,7 @@
         },
         {
           "id": "7bd14ede-d636-44cc-ac07-bc3fe6c565c0",
-          "width": 200,
+          "width": 190,
           "height": 108,
           "tag": "chart",
           "data": {
@@ -773,11 +780,11 @@
             "title": {
               "text": "Quantity ordered",
               "align": "left",
-              "color": "#434343",
+              "color": "#01666B",
               "bold": true
             },
             "type": "scorecard",
-            "background": "#EFF6FF",
+            "background": "#FFFFFF",
             "baseline": "Data!E5",
             "baselineDescr": {
               "text": "since last period"
@@ -786,7 +793,7 @@
             "chartId": "7bd14ede-d636-44cc-ac07-bc3fe6c565c0"
           },
           "offset": {
-            "x": 627,
+            "x": 597,
             "y": 9
           },
           "col": 1,
@@ -1112,6 +1119,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1165,6 +1180,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1214,6 +1237,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1262,6 +1293,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
           "type": "many2one"
         }
       },
@@ -1320,6 +1359,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1376,6 +1423,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
           "type": "many2one"
         }
       },
@@ -1445,6 +1500,20 @@
       "label": "Buyer",
       "modelName": "res.users",
       "defaultValueDisplayNames": []
+    },
+    {
+      "id": "aed820b1-59e2-55b1-9de5-a2647357ea0f",
+      "type": "relation",
+      "label": "Product",
+      "modelName": "product.product",
+      "defaultValueDisplayNames": []
+    },
+    {
+      "id": "57b6cded-632c-5b25-a8c6-58022b877d0f",
+      "type": "relation",
+      "label": "Product Category",
+      "modelName": "product.category",
+      "defaultValueDisplayNames": []
     }
   ],
   "lists": {
@@ -1477,6 +1546,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "order_line.product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "order_line.product_id.categ_id",
           "type": "many2one"
         }
       }
