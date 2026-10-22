@@ -298,6 +298,14 @@
                   "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
                     "chain": "user_id",
                     "type": "many2one"
+                  },
+                  "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+                    "chain": "product_id",
+                    "type": "many2one"
+                  },
+                  "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+                    "chain": "category_id",
+                    "type": "many2one"
                   }
                 },
                 "chartId": "155096a3-ad7f-4e64-bf38-051fcfc90ee0",
@@ -516,6 +524,37 @@
               }
             ]
           }
+        },
+        {
+          "id": "avg-order-value-0001",
+          "width": 325,
+          "height": 108,
+          "tag": "chart",
+          "data": {
+            "baselineColorDown": "#DC6965",
+            "baselineColorUp": "#00A04A",
+            "baselineMode": "percentage",
+            "title": {
+              "text": "Avg order value",
+              "align": "left",
+              "color": "#01666B",
+              "bold": true
+            },
+            "type": "scorecard",
+            "background": "#FFFFFF",
+            "baseline": "Data!E7",
+            "baselineDescr": {
+              "text": "since last period"
+            },
+            "keyValue": "Data!D7",
+            "chartId": "avg-order-value-0001"
+          },
+          "offset": {
+            "x": 675,
+            "y": 129
+          },
+          "col": 0,
+          "row": 0
         }
       ],
       "tables": [
@@ -636,7 +675,12 @@
         "E3": "=FORMAT.LARGE.NUMBER(C3)",
         "E4": "=FORMAT.LARGE.NUMBER(C4)",
         "E5": "=FORMAT.LARGE.NUMBER(C5)",
-        "E6": "=ROUNDUP(C6)"
+        "E6": "=ROUNDUP(C6)",
+        "A7": "=_t(\"Avg order value\")",
+        "B7": "=IFERROR(B2/B4,0)",
+        "C7": "=IFERROR(C2/C4,0)",
+        "D7": "=FORMAT.LARGE.NUMBER(B7)",
+        "E7": "=FORMAT.LARGE.NUMBER(C7)"
       },
       "styles": {
         "A1": 2,
@@ -653,7 +697,9 @@
         "E3": 8,
         "E4": 8,
         "E5": 8,
-        "E6": 8
+        "E6": 8,
+        "D7": 13,
+        "E7": 8
       },
       "formats": {
         "E6": 3
@@ -1064,6 +1110,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1117,6 +1171,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1166,6 +1228,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1214,6 +1284,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
           "type": "many2one"
         }
       },
@@ -1272,6 +1350,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1328,6 +1414,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
           "type": "many2one"
         }
       },
@@ -1397,6 +1491,20 @@
       "label": "Buyer",
       "modelName": "res.users",
       "defaultValueDisplayNames": []
+    },
+    {
+      "id": "aed820b1-59e2-55b1-9de5-a2647357ea0f",
+      "type": "relation",
+      "label": "Product",
+      "modelName": "product.product",
+      "defaultValueDisplayNames": []
+    },
+    {
+      "id": "57b6cded-632c-5b25-a8c6-58022b877d0f",
+      "type": "relation",
+      "label": "Product Category",
+      "modelName": "product.category",
+      "defaultValueDisplayNames": []
     }
   ],
   "lists": {
@@ -1449,6 +1557,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "order_line.product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "order_line.product_id.categ_id",
+          "type": "many2one"
         }
       }
     }
@@ -1480,6 +1596,10 @@
       "odooMenuId": "purchase.purchase_report"
     },
     "3b318ab5-0677-4790-8446-d37a0b4c6ac6": {
+      "type": "odooMenu",
+      "odooMenuId": "purchase.purchase_report"
+    },
+    "avg-order-value-0001": {
       "type": "odooMenu",
       "odooMenuId": "purchase.purchase_report"
     }
