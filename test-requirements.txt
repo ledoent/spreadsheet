@@ -1,0 +1,3 @@
+# DO NOT MERGE — temporary pin until OCA/spreadsheet#133 lands and the 20.0
+# wheel is published. Strip this file before requesting final review.
+odoo-addon-spreadsheet_dashboard_purchase_oca @ git+https://github.com/OCA/spreadsheet.git@refs/pull/133/head#subdirectory=spreadsheet_dashboard_purchase_oca
