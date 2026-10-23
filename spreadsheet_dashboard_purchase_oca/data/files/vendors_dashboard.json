@@ -298,6 +298,14 @@
                   "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
                     "chain": "user_id",
                     "type": "many2one"
+                  },
+                  "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+                    "chain": "product_id",
+                    "type": "many2one"
+                  },
+                  "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+                    "chain": "category_id",
+                    "type": "many2one"
                   }
                 },
                 "chartId": "155096a3-ad7f-4e64-bf38-051fcfc90ee0",
@@ -1064,6 +1072,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1117,6 +1133,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1166,6 +1190,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1214,6 +1246,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
           "type": "many2one"
         }
       },
@@ -1272,6 +1312,14 @@
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
           "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
+          "type": "many2one"
         }
       },
       "context": {},
@@ -1328,6 +1376,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "category_id",
           "type": "many2one"
         }
       },
@@ -1397,6 +1453,20 @@
       "label": "Buyer",
       "modelName": "res.users",
       "defaultValueDisplayNames": []
+    },
+    {
+      "id": "aed820b1-59e2-55b1-9de5-a2647357ea0f",
+      "type": "relation",
+      "label": "Product",
+      "modelName": "product.product",
+      "defaultValueDisplayNames": []
+    },
+    {
+      "id": "57b6cded-632c-5b25-a8c6-58022b877d0f",
+      "type": "relation",
+      "label": "Product Category",
+      "modelName": "product.category",
+      "defaultValueDisplayNames": []
     }
   ],
   "lists": {
@@ -1448,6 +1518,14 @@
         },
         "46501b8a-08a2-4d8c-abb5-7c52f9d1ada2": {
           "chain": "user_id",
+          "type": "many2one"
+        },
+        "aed820b1-59e2-55b1-9de5-a2647357ea0f": {
+          "chain": "order_line.product_id",
+          "type": "many2one"
+        },
+        "57b6cded-632c-5b25-a8c6-58022b877d0f": {
+          "chain": "order_line.product_id.categ_id",
           "type": "many2one"
         }
       }
