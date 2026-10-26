@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Copyright 2022 CreuBlanca
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record id="spreadsheet_dashboard_tree_view" model="ir.ui.view">
+        <field
+            name="name"
+        >spreadsheet.dashboard.tree (in spreadsheet_dashboard_oca)</field>
+        <field name="model">spreadsheet.dashboard</field>
+        <field
+            name="inherit_id"
+            ref="spreadsheet_dashboard.spreadsheet_dashboard_view_list"
+        />
+        <field name="arch" type="xml">
+            <list position="attributes">
+                <attribute name="create">1</attribute>
+                <attribute name="decoration-muted">not active</attribute>
+            </list>
+            <list position="inside">
+                <field name="can_edit" column_invisible="True" />
+                <field
+                    name="spreadsheet_binary_data"
+                    groups="base.group_no_one"
+                    widget="binary"
+                    filename="name"
+                />
+                <!-- Put the button 2 times for having the edit button explicitly disabled for discoverability -->
+                <button
+                    name="open_spreadsheet"
+                    type="object"
+                    string="Edit"
+                    icon="edit"
+                    icon_class="oi-filled"
+                    disabled="1"
+                    groups="base.group_system"
+                    invisible="can_edit"
+                />
+                <button
+                    name="open_spreadsheet"
+                    type="object"
+                    string="Edit"
+                    icon="edit"
+                    icon_class="oi-filled"
+                    groups="base.group_system"
+                    invisible="not can_edit"
+                />
+                <button
+                    name="copy"
+                    type="object"
+                    string="Copy"
+                    icon="content_copy"
+                    groups="base.group_system"
+                />
+                <field name="active" widget="boolean_toggle" />
+            </list>
+        </field>
+    </record>
+</odoo>
