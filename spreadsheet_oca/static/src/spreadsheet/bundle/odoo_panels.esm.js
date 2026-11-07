@@ -5,7 +5,8 @@ import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
 import {_t} from "@web/core/l10n/translation";
 import {useService} from "@web/core/utils/hooks";
 
-const {chartSidePanelComponentRegistry} = spreadsheet.registries;
+const {chartSidePanelComponentRegistry, chartDataSourceSidePanelComponentRegistry} =
+    spreadsheet.registries;
 const {
     PieChartDesignPanel,
     ChartWithAxisDesignPanel,
@@ -18,6 +19,24 @@ const {
     WaterfallChartDesignPanel,
 } = spreadsheet.components;
 const {Component, useProps} = owl;
+
+/**
+ * Data-source section of the chart side panel for charts fed by an Odoo view.
+ *
+ * Core only registers "range", whose section lets you pick the cell ranges. An
+ * Odoo chart has none to pick -- its data comes from the view it was inserted
+ * from -- so this names that view instead.
+ */
+export class OdooChartDataSourcePanel extends Component {
+    props = useProps();
+
+    get resModel() {
+        return this.props.dataSource?.metaData?.resModel || "";
+    }
+}
+OdooChartDataSourcePanel.template = "spreadsheet_oca.OdooChartDataSourcePanel";
+
+chartDataSourceSidePanelComponentRegistry.add("odoo", OdooChartDataSourcePanel);
 
 export class OdooPanel extends Component {
     props = useProps();
@@ -47,24 +66,25 @@ export class OdooPanel extends Component {
         return this.props.chartId;
     }
     get menuId() {
-        const menu = this.env.model.getters.getChartOdooMenu(this.chartId);
-        if (menu) {
-            return [menu.id, menu.name];
+        const odooLink = this.env.model.getters.getChartOdooLink(this.chartId);
+        if (odooLink?.type !== "odooMenu") {
+            return false;
         }
-        return false;
+        const menu = this.env.model.getters.getIrMenu(odooLink.odooMenuId);
+        return menu ? [menu.id, menu.name] : false;
     }
     updateMenu(menuId) {
         if (!menuId) {
-            this.env.model.dispatch("LINK_ODOO_MENU_TO_CHART", {
+            this.env.model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
                 chartId: this.chartId,
-                odooMenuId: false,
+                odooLink: undefined,
             });
             return;
         }
         const menu = this.env.model.getters.getIrMenu(menuId[0].id);
-        this.env.model.dispatch("LINK_ODOO_MENU_TO_CHART", {
+        this.env.model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
             chartId: this.chartId,
-            odooMenuId: menu.xmlid || menu.id,
+            odooLink: {type: "odooMenu", odooMenuId: menu.xmlid || menu.id},
         });
     }
     get record() {

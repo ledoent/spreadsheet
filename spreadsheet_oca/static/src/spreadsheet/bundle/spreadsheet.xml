@@ -584,6 +584,12 @@
             </div>
         </div>
     </t>
+    <t t-name="spreadsheet_oca.OdooChartDataSourcePanel" owl="1">
+        <div class="o-section">
+            <div class="o-section-title">Data source</div>
+            <div class="o-section-value" t-esc="this.resModel" />
+        </div>
+    </t>
     <t t-name="spreadsheet_oca.OdooPanel" owl="1">
         <div class="o-section">
             <div class="o-section-title">Link to Odoo menu</div>
