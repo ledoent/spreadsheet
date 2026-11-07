@@ -112,22 +112,32 @@ export class ActionSpreadsheetOca extends Component {
             // TODO: Add a way to detect the last row total height
         }
         const dataSourceId = uuidGenerator.uuidv4();
-        const chartType = `odoo_${this.import_data.metaData.mode}`;
+        // 20.0 dropped the `odoo_*` chart types: the chart now carries the plain
+        // o-spreadsheet type and names Odoo as its data source. `metaData.mode` is
+        // no longer stored either -- ChartDataSource derives it from `type`.
+        const chartType = this.import_data.metaData.mode;
         const definition = {
             title: {text: this.import_data.name},
             type: chartType,
-            fillArea: chartType === "odoo_line",
             background: "#FFFFFF",
-            stacked: this.import_data.metaData.stacked,
-            axisType: this.import_data.metaData.axisType,
-            metaData: this.import_data.metaData,
-            searchParams: this.cleanSearchParams(),
-            cumulative: this.import_data.metaData.cumulated,
-            cumulatedStart: this.import_data.metaData.cumulatedStart,
             legendPosition: "top",
-            verticalAxisPosition: "left",
-            actionXmlId: this.import_data.actionXmlId,
+            dataSource: {
+                type: "odoo",
+                metaData: this.import_data.metaData,
+                searchParams: this.cleanSearchParams(),
+                cumulatedStart: this.import_data.metaData.cumulatedStart,
+                actionXmlId: this.import_data.actionXmlId,
+            },
         };
+        // Keys outside a chart type's `allowedDefinitionKeys` are dropped without
+        // a word, so only set the ones that type accepts.
+        if (chartType === "bar" || chartType === "line") {
+            definition.stacked = this.import_data.metaData.stacked;
+        }
+        if (chartType === "line") {
+            definition.fillArea = true;
+            definition.cumulative = this.import_data.metaData.cumulated;
+        }
         spreadsheet_model.dispatch("CREATE_CHART", {
             sheetId,
             figureId: uuidGenerator.uuidv4(),
