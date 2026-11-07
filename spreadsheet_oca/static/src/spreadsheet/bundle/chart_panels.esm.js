@@ -38,24 +38,25 @@ const menuChartProps = () => ({
         return [["id", "in", menus]];
     },
     get menuId() {
-        const menu = this.env.model.getters.getChartOdooMenu(this.props.chartId);
-        if (menu) {
-            return [menu.id, menu.name];
+        const odooLink = this.env.model.getters.getChartOdooLink(this.props.chartId);
+        if (odooLink?.type !== "odooMenu") {
+            return false;
         }
-        return false;
+        const menu = this.env.model.getters.getIrMenu(odooLink.odooMenuId);
+        return menu ? [menu.id, menu.name] : false;
     },
     updateMenu(menuId) {
         if (!menuId) {
-            this.env.model.dispatch("LINK_ODOO_MENU_TO_CHART", {
+            this.env.model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
                 chartId: this.props.chartId,
-                odooMenuId: false,
+                odooLink: undefined,
             });
             return;
         }
         const menu = this.env.model.getters.getIrMenu(menuId[0].id);
-        this.env.model.dispatch("LINK_ODOO_MENU_TO_CHART", {
+        this.env.model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
             chartId: this.props.chartId,
-            odooMenuId: menu.xmlid || menu.id,
+            odooLink: {type: "odooMenu", odooMenuId: menu.xmlid || menu.id},
         });
     },
     get record() {
