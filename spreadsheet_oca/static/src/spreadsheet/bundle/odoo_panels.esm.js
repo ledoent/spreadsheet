@@ -5,7 +5,8 @@ import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
 import {_t} from "@web/core/l10n/translation";
 import {useService} from "@web/core/utils/hooks";
 
-const {chartSidePanelComponentRegistry} = spreadsheet.registries;
+const {chartSidePanelComponentRegistry, chartDataSourceSidePanelComponentRegistry} =
+    spreadsheet.registries;
 const {
     PieChartDesignPanel,
     ChartWithAxisDesignPanel,
@@ -18,6 +19,24 @@ const {
     WaterfallChartDesignPanel,
 } = spreadsheet.components;
 const {Component, useProps} = owl;
+
+/**
+ * Data-source section of the chart side panel for charts fed by an Odoo view.
+ *
+ * Core only registers "range", whose section lets you pick the cell ranges. An
+ * Odoo chart has none to pick -- its data comes from the view it was inserted
+ * from -- so this names that view instead.
+ */
+export class OdooChartDataSourcePanel extends Component {
+    props = useProps();
+
+    get resModel() {
+        return this.props.dataSource?.metaData?.resModel || "";
+    }
+}
+OdooChartDataSourcePanel.template = "spreadsheet_oca.OdooChartDataSourcePanel";
+
+chartDataSourceSidePanelComponentRegistry.add("odoo", OdooChartDataSourcePanel);
 
 export class OdooPanel extends Component {
     props = useProps();
