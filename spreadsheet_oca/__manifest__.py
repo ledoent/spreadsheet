@@ -39,6 +39,7 @@
             "spreadsheet_oca/static/src/spreadsheet/bundle/image_file_store.esm.js",
             "spreadsheet_oca/static/src/spreadsheet/bundle/filter.esm.js",
             "spreadsheet_oca/static/src/spreadsheet/bundle/filter_panel_datasources.esm.js",
+            "spreadsheet_oca/static/src/spreadsheet/bundle/spreadsheet_transport_service.esm.js",
             "spreadsheet_oca/static/src/spreadsheet/bundle/spreadsheet_renderer.esm.js",
             "spreadsheet_oca/static/src/spreadsheet/bundle/spreadsheet_controlpanel.esm.js",
             "spreadsheet_oca/static/src/spreadsheet/bundle/spreadsheet_action.esm.js",

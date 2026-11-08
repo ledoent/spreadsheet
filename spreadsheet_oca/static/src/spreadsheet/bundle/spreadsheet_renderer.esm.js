@@ -4,6 +4,7 @@ import {Component, onWillStart, t, useProps} from "@odoo/owl";
 import {ImageFileStore} from "./image_file_store.esm";
 import {OdooDataProvider} from "@spreadsheet/data_sources/odoo_data_provider";
 import {SpreadsheetComponent} from "@spreadsheet/actions/spreadsheet_component";
+import {SpreadsheetTransportService} from "./spreadsheet_transport_service.esm";
 import {_t} from "@web/core/l10n/translation";
 import {loadBundle} from "@web/core/assets";
 import {useService} from "@web/core/utils/hooks";
@@ -16,66 +17,6 @@ const {Model, load} = spreadsheet;
 
 const {useStoreProvider, ModelStore} = spreadsheet.stores;
 const {UuidGenerator} = spreadsheet.helpers;
-
-class SpreadsheetTransportService {
-    constructor(orm, bus_service, model, res_id) {
-        this.orm = orm.silent;
-        this.bus_service = bus_service;
-        this.model = model;
-        this.res_id = res_id;
-        this.channel = "spreadsheet_oca;" + this.model + ";" + this.res_id;
-        this.bus_service.addChannel(this.channel);
-        this.dialog = useService("dialog");
-        this.bus_service.subscribe("spreadsheet_oca", (payload) => {
-            if (payload.id === this.res_id) {
-                this._handleNotification(payload);
-            }
-        });
-        this.listeners = [];
-        this._listener = null;
-    }
-    onNotification({detail: notifications}) {
-        for (const {payload, type} of notifications) {
-            if (
-                type === "spreadsheet_oca" &&
-                payload.res_model === this.model &&
-                payload.res_id === this.res_id
-            ) {
-                // What shall we do if no callback is defined (empty until onNewMessage...) :/
-                for (const {callback} of this.listeners) {
-                    callback(payload);
-                }
-            }
-        }
-    }
-    async sendMessage(message) {
-        const isAccepted = await this.orm.call(this.model, "send_spreadsheet_message", [
-            [this.res_id],
-            message,
-            this.accessToken,
-        ]);
-        if (isAccepted) {
-            this._handleNotification(message);
-        }
-    }
-    onNewMessage(id, callback) {
-        this._listener = callback;
-        for (const message of this.listeners) {
-            callback(message);
-        }
-        this.listeners = [];
-    }
-    leave(id) {
-        this.listeners = this.listeners.filter((listener) => listener.id !== id);
-    }
-    _handleNotification(payload) {
-        if (!this._listener) {
-            this.listeners.push(payload);
-        } else {
-            this._listener(payload);
-        }
-    }
-}
 
 export class SpreadsheetRenderer extends Component {
     static template = "spreadsheet_oca.SpreadsheetRenderer";
@@ -126,6 +67,19 @@ export class SpreadsheetRenderer extends Component {
             });
         };
     }
+    /**
+     * Connected clients, us included. getConnectedClients() is a Set on the
+     * session but arrives through the getters as an Array, so accept either.
+     *
+     * @returns {Number}
+     */
+    getConnectedClientCount() {
+        const clients = this.spreadsheet_model?.getters.getConnectedClients();
+        if (!clients) {
+            return 2;
+        }
+        return clients.size ?? clients.length ?? 2;
+    }
     setup() {
         this.orm = useService("orm");
         this.http = useService("http");
@@ -161,7 +115,8 @@ export class SpreadsheetRenderer extends Component {
                     this.orm,
                     this.bus_service,
                     this.props.model,
-                    this.props.res_id
+                    this.props.res_id,
+                    {getClientCount: () => this.getConnectedClientCount()}
                 ),
                 client: {
                     id: UuidGenerator.uuidv4(),
@@ -179,8 +134,9 @@ export class SpreadsheetRenderer extends Component {
         onWillStart(async () => {
             await loadBundle("spreadsheet.o_spreadsheet");
             await waitForDataLoaded(this.spreadsheet_model);
+            // No joinSession(): the Model constructor already joined, and a
+            // second join clears our own position.
             await this.env.importData(this.spreadsheet_model);
-            this.spreadsheet_model.joinSession();
             this.stores.inject(ModelStore, this.spreadsheet_model);
         });
         useSetupAction({
