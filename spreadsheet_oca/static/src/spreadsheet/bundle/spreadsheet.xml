@@ -176,7 +176,7 @@
                         t-att-disabled="column_first"
                         t-on-click="() => this.moveColumn(column_index, -1)"
                     >
-                        <i class="fa fa-arrow-up" />
+                        <i class="oi" data-icon="arrow_upward" />
                     </button>
                     <button
                         class="btn btn-link btn-sm p-0 o_spreadsheet_oca_list_column_down"
@@ -184,14 +184,14 @@
                         t-att-disabled="column_last"
                         t-on-click="() => this.moveColumn(column_index, 1)"
                     >
-                        <i class="fa fa-arrow-down" />
+                        <i class="oi" data-icon="arrow_downward" />
                     </button>
                     <button
                         class="btn btn-link btn-sm p-0 text-danger o_spreadsheet_oca_list_column_remove"
                         title="Remove column"
                         t-on-click="() => this.removeColumn(column_index)"
                     >
-                        <i class="fa fa-trash" />
+                        <i class="oi oi-filled" data-icon="delete" />
                     </button>
                 </div>
                 <div class="d-flex align-items-center gap-1 mt-2">
@@ -466,7 +466,7 @@
         <i class="oi" data-icon="table_chart" />
     </t>
     <t t-name="spreadsheet_oca.ListIcon">
-        <i class="oi" data-icon="list" />
+        <i class="oi" data-icon="view_list" />
     </t>
     <t
         t-name="spreadsheet_oca.SpreadsheetControlPanel"
