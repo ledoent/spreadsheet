@@ -1,5 +1,4 @@
 id,name,model_id,group_id/id,operation,domain
-access_spreadsheet_spreadsheet,access_spreadsheet_spreadsheet,spreadsheet.spreadsheet,spreadsheet_oca.group_user,crud,
 access_spreadsheet_oca_revision,access_spreadsheet_oca_revision,spreadsheet.oca.revision,base.group_user,crud,
 spreadsheet_oca.access_spreadsheet_spreadsheet_import,access_spreadsheet_spreadsheet_import,spreadsheet.spreadsheet.import,base.group_user,crud,
 access_spreadsheet_import_mode,access_spreadsheet_oca_revision,spreadsheet.spreadsheet.import.mode,base.group_user,r,

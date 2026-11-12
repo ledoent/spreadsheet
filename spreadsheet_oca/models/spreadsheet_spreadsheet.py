@@ -15,7 +15,12 @@ class SpreadsheetSpreadsheet(models.Model):
     filename = fields.Char(compute="_compute_filename")
     badge_image = fields.Image("Badge Background", max_width=1024, max_height=1024)
     owner_id = fields.Many2one(
-        "res.users", required=True, default=lambda r: r.env.user.id
+        # copy=False: duplicating someone else's spreadsheet would otherwise copy
+        # their owner_id, and the owner rule then rejects the create.
+        "res.users",
+        required=True,
+        copy=False,
+        default=lambda r: r.env.user.id,
     )
     contributor_ids = fields.Many2many(
         "res.users",
