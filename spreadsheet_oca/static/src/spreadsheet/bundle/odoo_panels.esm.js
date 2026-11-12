@@ -1,0 +1,165 @@
+import * as spreadsheet from "@odoo/o-spreadsheet";
+
+import {Domain} from "@web/core/domain";
+import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
+import {_t} from "@web/core/l10n/translation";
+import {useService} from "@web/core/utils/hooks";
+
+const {chartSidePanelComponentRegistry, chartDataSourceSidePanelComponentRegistry} =
+    spreadsheet.registries;
+const {
+    PieChartDesignPanel,
+    ChartWithAxisDesignPanel,
+    ComboChartDesignPanel,
+    FunnelChartDesignPanel,
+    GeoChartDesignPanel,
+    RadarChartDesignPanel,
+    SunburstChartDesignPanel,
+    TreeMapChartDesignPanel,
+    WaterfallChartDesignPanel,
+} = spreadsheet.components;
+const {Component, useProps} = owl;
+
+/**
+ * Data-source section of the chart side panel for charts fed by an Odoo view.
+ *
+ * Core only registers "range", whose section lets you pick the cell ranges. An
+ * Odoo chart has none to pick -- its data comes from the view it was inserted
+ * from -- so this names that view instead.
+ */
+export class OdooChartDataSourcePanel extends Component {
+    props = useProps();
+
+    get resModel() {
+        return this.props.dataSource?.metaData?.resModel || "";
+    }
+}
+OdooChartDataSourcePanel.template = "spreadsheet_oca.OdooChartDataSourcePanel";
+
+chartDataSourceSidePanelComponentRegistry.add("odoo", OdooChartDataSourcePanel);
+
+export class OdooPanel extends Component {
+    props = useProps();
+
+    setup() {
+        this.menus = useService("menu");
+    }
+    get menuProps() {
+        return {
+            fieldString: _t("Menu Items"),
+            resModel: "ir.ui.menu",
+            update: this.updateMenu.bind(this),
+            activeActions: {},
+            getDomain: this.getDomain.bind(this),
+            placeholder: _t("Select a menu..."),
+            value: this.menuId ? this.menuId[1] : "",
+        };
+    }
+    getDomain() {
+        const menus = this.menus
+            .getAll()
+            .map((menu) => menu.id)
+            .filter((menuId) => menuId !== "root");
+        return [["id", "in", menus]];
+    }
+    get chartId() {
+        return this.props.chartId;
+    }
+    get menuId() {
+        const odooLink = this.env.model.getters.getChartOdooLink(this.chartId);
+        if (odooLink?.type !== "odooMenu") {
+            return false;
+        }
+        const menu = this.env.model.getters.getIrMenu(odooLink.odooMenuId);
+        return menu ? [menu.id, menu.name] : false;
+    }
+    updateMenu(menuId) {
+        if (!menuId) {
+            this.env.model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
+                chartId: this.chartId,
+                odooLink: undefined,
+            });
+            return;
+        }
+        const menu = this.env.model.getters.getIrMenu(menuId[0].id);
+        this.env.model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
+            chartId: this.chartId,
+            odooLink: {type: "odooMenu", odooMenuId: menu.xmlid || menu.id},
+        });
+    }
+    get record() {
+        const menus = this.menus
+            .getAll()
+            .map((menu) => menu.id)
+            .filter((menuId) => menuId !== "root");
+        return {
+            getFieldDomain: function () {
+                return new Domain([["id", "in", menus]]);
+            },
+            getFieldContext: function () {
+                return {};
+            },
+        };
+    }
+}
+OdooPanel.template = "spreadsheet_oca.OdooPanel";
+OdooPanel.components = {Many2XAutocomplete};
+
+class OdooStackablePanel extends OdooPanel {
+    onChangeStacked(ev) {
+        this.props.updateChart(this.chartId, {
+            stacked: ev.target.checked,
+        });
+    }
+}
+OdooStackablePanel.template = "spreadsheet_oca.OdooStackablePanel";
+
+chartSidePanelComponentRegistry
+    .add("odoo_line", {
+        configuration: OdooStackablePanel,
+        design: PieChartDesignPanel,
+    })
+    .add("odoo_bar", {
+        configuration: OdooStackablePanel,
+        design: PieChartDesignPanel,
+    })
+    .add("odoo_pie", {
+        configuration: OdooPanel,
+        design: PieChartDesignPanel,
+    })
+    .add("odoo_combo", {
+        configuration: OdooPanel,
+        design: ComboChartDesignPanel,
+    })
+    .add("odoo_scatter", {
+        configuration: OdooStackablePanel,
+        design: ChartWithAxisDesignPanel,
+    })
+    .add("odoo_pyramid", {
+        configuration: OdooPanel,
+        design: ChartWithAxisDesignPanel,
+    })
+    .add("odoo_waterfall", {
+        configuration: OdooPanel,
+        design: WaterfallChartDesignPanel,
+    })
+    .add("odoo_radar", {
+        configuration: OdooPanel,
+        design: RadarChartDesignPanel,
+    })
+    .add("odoo_sunburst", {
+        configuration: OdooPanel,
+        design: SunburstChartDesignPanel,
+    })
+    .add("odoo_treemap", {
+        configuration: OdooPanel,
+        design: TreeMapChartDesignPanel,
+    })
+    .add("odoo_geo", {
+        configuration: OdooPanel,
+        design: GeoChartDesignPanel,
+    })
+    .add("odoo_funnel", {
+        configuration: OdooPanel,
+        design: FunnelChartDesignPanel,
+    });
